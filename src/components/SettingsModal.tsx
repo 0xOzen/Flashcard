@@ -52,12 +52,30 @@ export default function SettingsModal({
   onImportBackup,
 }: SettingsModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [browserKeyDraft, setBrowserKeyDraft] = useState(browserApiKey);
 
   useEffect(() => {
     setBrowserKeyDraft(browserApiKey);
   }, [browserApiKey, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -80,20 +98,35 @@ export default function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/25 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-white/60 bg-[#fbfbfd] shadow-[0_20px_80px_rgba(0,0,0,0.18)]">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/25 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        ref={panelRef}
+        className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-white/60 bg-[#fbfbfd] shadow-[0_20px_80px_rgba(0,0,0,0.18)]"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-black/5 px-6 py-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Ayarlar</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#1d1d1f]">AI ve Kurulum</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full border border-gray-200 bg-white p-2 text-gray-400 transition-colors hover:text-gray-700"
-            aria-label="Ayarlari kapat"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300"
+            >
+              Kapat
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-full border border-gray-200 bg-white p-2 text-gray-500 transition-colors hover:text-gray-800"
+              aria-label="Ayarlari kapat"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="space-y-8 px-6 py-6">
