@@ -1,0 +1,90 @@
+import { Flashcard } from './types';
+
+export const ALMANCA_KELIMELER: Flashcard[] = [
+  {
+    id: "1",
+    term: "Hund",
+    translationTr: "Köpek",
+    wordType: "noun",
+    article: "der",
+    plural: "die Hunde",
+    example: "Der Hund bellt laut.",
+    exampleTranslation: "Köpek yüksek sesle havlıyor.",
+    level: "A1",
+  },
+  {
+    id: "2",
+    term: "Katze",
+    translationTr: "Kedi",
+    wordType: "noun",
+    article: "die",
+    plural: "die Katzen",
+    example: "Die Katze schläft auf dem Sofa.",
+    exampleTranslation: "Kedi kanepede uyuyor.",
+    level: "A1",
+  },
+  {
+    id: "3",
+    term: "gehen",
+    translationTr: "gitmek",
+    wordType: "verb",
+    verbForms: {
+        present: "geht",
+        preterite: "ging",
+        participle: "gegangen",
+        auxiliary: "sein",
+    },
+    example: "Ich gehe nach Hause.",
+    exampleTranslation: "Eve gidiyorum.",
+    level: "A1",
+  },
+  {
+    id: "4",
+    term: "schnell",
+    translationTr: "hızlı",
+    wordType: "adjective",
+    adjectiveForms: {
+        comparative: "schneller",
+        superlative: "am schnellsten",
+    },
+    example: "Er läuft sehr schnell.",
+    exampleTranslation: "O çok hızlı koşar.",
+    level: "A2",
+  },
+  {
+    id: "5",
+    term: "Haus",
+    translationTr: "Ev",
+    wordType: "noun",
+    article: "das",
+    plural: "die Häuser",
+    example: "Das Haus ist groß.",
+    exampleTranslation: "Ev büyüktür.",
+    level: "A1"
+  },
+  {
+    id: "6",
+    term: "Buch",
+    translationTr: "Kitap",
+    wordType: "noun",
+    article: "das",
+    plural: "die Bücher"
+  },
+  {
+    id: "11",
+    term: "Hallo",
+    translationTr: "Merhaba",
+    wordType: "phrase",
+    example: "Hallo, wie geht es dir?",
+    exampleTranslation: "Merhaba, nasılsın?",
+    level: "A1",
+  },
+  {
+    id: "12",
+    term: "Danke",
+    translationTr: "Teşekkürler",
+    wordType: "phrase",
+    example: "Danke für deine Hilfe.",
+    exampleTranslation: "Yardımın için teşekkürler.",
+  }
+];
