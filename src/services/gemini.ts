@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import { AppState } from '../types';
 
 export type ImageMnemonicResult =
@@ -12,6 +11,7 @@ async function generateViaBrowserKey(
   apiKey: string,
 ): Promise<ImageMnemonicResult> {
   try {
+    const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey });
     const prompt = `Create a highly descriptive, visually memorable, cartoonish mnemonic illustration for the German term "${term}". Meaning: "${translation}". Keep it image-first, fun, and useful for vocabulary recall. Minimal or no text in the image.`;
 
