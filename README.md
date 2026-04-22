@@ -59,6 +59,12 @@ Browser-key modu kullaniyorsan:
 - Build command: `npm run build:web`
 - Build output directory: `dist`
 
+Not:
+
+- Ilk MVP icin repoda `wrangler.toml` bulundurulmuyor
+- Cloudflare Pages bu projeyi saf statik Vite uygulamasi gibi deploy etmeli
+- Cloudflare dashboard'da Worker entrypoint veya Functions ayari yapmana gerek yok
+
 Cloudflare Pages Free ile ilgili pratik notlar:
 
 - Statik asset istekleri ucretsizdir
@@ -71,10 +77,11 @@ Bu projede ilk MVP icin en kolay Cloudflare Pages akisi:
 1. Repo'yu GitHub'a push et
 2. Cloudflare Pages'de `Create project` sec
 3. GitHub repo'nu bagla
-4. Framework preset olarak `Vite` veya `None` kullan
+4. Framework preset olarak `Vite` sec
 5. Build command olarak `npm run build:web` gir
 6. Output directory olarak `dist` gir
-7. Deploy et
+7. Root directory alanini bos birak
+8. Deploy et
 
 Browser-key modu kullaniyorsan Cloudflare'a environment variable girmen gerekmez.
 
