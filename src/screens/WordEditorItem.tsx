@@ -59,12 +59,12 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
     onUpdate(word.id, 'phraseForms', updated);
   };
 
-  const termLabel = word.wordType === 'noun' ? 'GERMAN NOUN' :
-                    word.wordType === 'verb' ? 'GERMAN INFINITIVE' :
-                    word.wordType === 'adjective' ? 'GERMAN ADJECTIVE' :
-                    word.wordType === 'phrase' ? 'GERMAN PHRASE' : 'GERMAN (TERM)';
+  const termLabel = word.wordType === 'noun' ? 'ALMANCA İSİM' :
+                    word.wordType === 'verb' ? 'ALMANCA FİİL' :
+                    word.wordType === 'adjective' ? 'ALMANCA SIFAT' :
+                    word.wordType === 'phrase' ? 'ALMANCA İFADE' : 'ALMANCA TERİM';
 
-  const glossLabel = word.wordType === 'phrase' ? 'ENGLISH MEANING' : 'ENGLISH GLOSS';
+  const glossLabel = word.wordType === 'phrase' ? 'TÜRKÇE ANLAM' : 'TÜRKÇE KARŞILIK';
 
   return (
     <div className="p-6 md:p-8 bg-white rounded-[24px] border border-gray-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative group mb-6 transition-all hover:border-gray-300/80">
@@ -72,29 +72,29 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       {/* Top Header Controls */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <div className="w-full sm:w-64">
-          <Label>CARD TYPE</Label>
+          <Label>KART TÜRÜ</Label>
           <select 
             value={word.wordType || 'other'} 
             onChange={(e) => onUpdate(word.id, 'wordType', e.target.value as WordType)}
             disabled={isDefault}
             className="w-full bg-white border border-gray-200 rounded-[14px] px-3.5 py-2.5 text-sm font-medium text-gray-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-50 transition-all"
           >
-            <option value="other">Select...</option>
-            <option value="noun">Noun</option>
-            <option value="verb">Verb</option>
-            <option value="adjective">Adjective</option>
-            <option value="phrase">Phrase</option>
+            <option value="other">Seç...</option>
+            <option value="noun">İsim</option>
+            <option value="verb">Fiil</option>
+            <option value="adjective">Sıfat</option>
+            <option value="phrase">İfade</option>
           </select>
         </div>
         <div className="w-full sm:w-32">
-          <Label>LEVEL</Label>
+          <Label>SEVİYE</Label>
           <select 
             value={word.level || ''} 
             onChange={(e) => onUpdate(word.id, 'level', e.target.value)}
             disabled={isDefault}
             className="w-full bg-white border border-gray-200 rounded-[14px] px-3.5 py-2.5 text-sm font-medium text-gray-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-50 transition-all appearance-none"
           >
-             <option value="">N/A</option>
+             <option value="">Yok</option>
              <option value="A1">A1</option>
              <option value="A2">A2</option>
              <option value="B1">B1</option>
@@ -122,17 +122,17 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       {word.wordType === 'noun' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
           <div>
-            <Label>ARTICLE</Label>
+            <Label>ARTİKEL</Label>
             <select value={word.article || ''} onChange={(e) => onUpdate(word.id, 'article', e.target.value)} disabled={isDefault} 
                     className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all appearance-none cursor-pointer">
-              <option value="">Select...</option>
+              <option value="">Seç...</option>
               <option value="der">der</option>
               <option value="die">die</option>
               <option value="das">das</option>
             </select>
           </div>
           <div>
-            <Label>PLURAL</Label>
+            <Label>ÇOĞUL</Label>
             <input value={word.plural || ''} onChange={(e) => onUpdate(word.id, 'plural', e.target.value)} disabled={isDefault} 
                    className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all" />
           </div>
@@ -143,15 +143,15 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       {word.wordType === 'verb' && (
         <div className="mb-8 pt-6 border-t border-gray-100">
           <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-5">
-            <h4 className="text-[17px] font-bold text-gray-900 tracking-tight whitespace-nowrap">Tense snapshots</h4>
-            <p className="text-[15px] text-gray-500">Capture the forms learners usually memorize together for German verbs.</p>
+            <h4 className="text-[17px] font-bold text-gray-900 tracking-tight whitespace-nowrap">Fiil çekimleri</h4>
+            <p className="text-[15px] text-gray-500">Almanca fiiller için birlikte ezberlenen temel biçimleri kaydet.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.5fr_1.5fr] gap-4 mb-4">
             <div>
-              <Label>AUXILIARY</Label>
+              <Label>YARDIMCI FİİL</Label>
               <select value={word.verbForms?.auxiliary || ''} onChange={(e) => updateVerbForm('auxiliary', e.target.value)} disabled={isDefault} 
                       className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all appearance-none cursor-pointer">
-                <option value="">Select</option>
+                <option value="">Seç</option>
                 <option value="haben">haben</option>
                 <option value="sein">sein</option>
               </select>
@@ -177,14 +177,14 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
             <div>
-              <Label>IMPERATIVE</Label>
+              <Label>IMPERATIV</Label>
               <input value={word.verbForms?.imperative || ''} onChange={(e) => updateVerbForm('imperative', e.target.value)} disabled={isDefault} 
                      placeholder="geh!"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
           </div>
           <div className="sm:w-1/2">
-            <Label>PATTERN / CASE</Label>
+            <Label>KULLANIM / HAL</Label>
             <input value={word.verbForms?.usagePattern || ''} onChange={(e) => updateVerbForm('usagePattern', e.target.value)} disabled={isDefault} 
                    placeholder="warten auf + Akk"
                    className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
@@ -196,24 +196,24 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       {word.wordType === 'adjective' && (
         <div className="mb-8 pt-6 border-t border-gray-100">
           <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-5">
-            <h4 className="text-[17px] font-bold text-gray-900 tracking-tight whitespace-nowrap">Adjective forms</h4>
-            <p className="text-[15px] text-gray-500">Save the forms and usage hints that matter most in comparison drills.</p>
+            <h4 className="text-[17px] font-bold text-gray-900 tracking-tight whitespace-nowrap">Sıfat biçimleri</h4>
+            <p className="text-[15px] text-gray-500">Karşılaştırma çalışmalarında en çok kullanılan biçimleri ve notları kaydet.</p>
           </div>
           <div className="space-y-4">
             <div>
-              <Label>COMPARATIVE</Label>
+              <Label>KOMPARATIV</Label>
               <input value={word.adjectiveForms?.comparative || ''} onChange={(e) => updateAdjForm('comparative', e.target.value)} disabled={isDefault} 
                      placeholder="wichtiger"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
             <div>
-              <Label>SUPERLATIVE</Label>
+              <Label>SUPERLATIV</Label>
               <input value={word.adjectiveForms?.superlative || ''} onChange={(e) => updateAdjForm('superlative', e.target.value)} disabled={isDefault} 
                      placeholder="am wichtigsten"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
             <div>
-              <Label>USAGE PATTERN</Label>
+              <Label>KULLANIM KALIBI</Label>
               <input value={word.adjectiveForms?.usage || ''} onChange={(e) => updateAdjForm('usage', e.target.value)} disabled={isDefault} 
                      placeholder="wichtig für + Akk"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
@@ -226,20 +226,20 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       {word.wordType === 'phrase' && (
         <div className="mb-8 pt-6 border-t border-gray-100">
           <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-5">
-            <h4 className="text-[17px] font-bold text-gray-900 tracking-tight whitespace-nowrap">Expression specifics</h4>
-            <p className="text-[15px] text-gray-500">Record common usages (Redemittel) and everyday vernacular (Alltagssprache).</p>
+            <h4 className="text-[17px] font-bold text-gray-900 tracking-tight whitespace-nowrap">İfade detayları</h4>
+            <p className="text-[15px] text-gray-500">Sık kullanılan kalıpları ve gündelik dil varyasyonlarını kaydet.</p>
           </div>
           <div className="space-y-4">
             <div>
-              <Label>REDEMITTEL / EXPRESSIONS</Label>
+              <Label>REDEMITTEL / KALIPLAR</Label>
               <textarea value={word.phraseForms?.redemittel || ''} onChange={(e) => updatePhraseForm('redemittel', e.target.value)} disabled={isDefault}
-                     placeholder="e.g., in diesem Zusammenhang..."
+                     placeholder="örn. in diesem Zusammenhang..."
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 resize-y min-h-[90px] transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
             <div>
-              <Label>ALLTAGSSPRACHE (EVERYDAY SLANG/USAGE)</Label>
+              <Label>ALLTAGSSPRACHE (GÜNLÜK KULLANIM)</Label>
               <textarea value={word.phraseForms?.alltagssprache || ''} onChange={(e) => updatePhraseForm('alltagssprache', e.target.value)} disabled={isDefault} 
-                     placeholder="e.g., 'Da hast du recht', 'Echt jetzt?'"
+                     placeholder="örn. 'Da hast du recht', 'Echt jetzt?'"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 resize-y min-h-[90px] transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
           </div>
@@ -249,19 +249,19 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       {/* Global Fields */}
       <div className="space-y-5 mb-5">
         <div>
-          <Label>EXAMPLE SENTENCE</Label>
+          <Label>ÖRNEK CÜMLE</Label>
           <textarea value={word.example || ''} onChange={(e) => onUpdate(word.id, 'example', e.target.value)} disabled={isDefault}
              className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 resize-y min-h-[90px] transition-all placeholder:font-normal placeholder:text-gray-400"
           />
         </div>
         <div>
-          <Label>EXAMPLE TRANSLATION</Label>
+          <Label>ÖRNEK ÇEVİRİ</Label>
           <input value={word.exampleTranslation || ''} onChange={(e) => onUpdate(word.id, 'exampleTranslation', e.target.value)} disabled={isDefault}
              className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400"
           />
         </div>
         <div>
-          <Label>GRAMMAR NOTE</Label>
+          <Label>DİLBİLGİ NOTU</Label>
           <textarea value={word.note || ''} onChange={(e) => onUpdate(word.id, 'note', e.target.value)} disabled={isDefault}
              className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 resize-y min-h-[90px] transition-all placeholder:font-normal placeholder:text-gray-400"
           />
@@ -272,7 +272,7 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
         <div className="flex items-center gap-4">
           {word.imageUrl && (
             <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-200 shrink-0 bg-gray-50 shadow-sm">
-               <img src={word.imageUrl} alt="Mnemonic" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+               <img src={word.imageUrl} alt="Hatırlatıcı görsel" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
             </div>
           )}
           <button 

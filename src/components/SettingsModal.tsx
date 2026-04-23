@@ -133,7 +133,7 @@ export default function SettingsModal({
           <section>
             <div className="mb-4 flex items-center gap-2">
               <Bot size={18} className="text-blue-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900">AI Gorsel Modeli</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-gray-900">YZ Görsel Modeli</h3>
             </div>
             <div className={`mb-4 rounded-2xl border px-4 py-3 text-sm ${
               isOnline ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'
@@ -176,15 +176,15 @@ export default function SettingsModal({
           <section className="rounded-3xl border border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-sky-50 p-5">
             <div className="mb-2 flex items-center gap-2">
               <KeyRound size={18} className="text-blue-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900">Kolay Mod: Browser API Key</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-gray-900">Kolay Mod: Tarayıcı API Anahtarı</h3>
             </div>
             <p className="text-sm leading-6 text-gray-600">
-              Buraya kendi Gemini API key'ini girersen AI gorsel uretimi dogrudan browser uzerinden calisir. Bu, server kurmadan kullanmanin en kolay yolu.
+              Buraya kendi Gemini API anahtarını girersen YZ görsel üretimi doğrudan tarayıcı üzerinden çalışır. Bu, sunucu kurmadan kullanmanın en kolay yoludur.
             </p>
             <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               <div className="flex items-start gap-2">
                 <ShieldAlert size={16} className="mt-0.5 shrink-0" />
-                <span>Bu mod sadece kisisel kullanim icin uygundur. Key bu cihazda lokal saklanir ve production guvenligi saglamaz.</span>
+                <span>Bu mod sadece kişisel kullanım için uygundur. Anahtar bu cihazda lokal saklanır ve production güvenliği sağlamaz.</span>
               </div>
             </div>
             <div className="mt-4 space-y-3">
@@ -192,7 +192,7 @@ export default function SettingsModal({
                 type="password"
                 value={browserKeyDraft}
                 onChange={(event) => setBrowserKeyDraft(event.target.value)}
-                placeholder="Gemini API key"
+                placeholder="Gemini API anahtarı"
                 className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
               />
               <div className="flex flex-wrap gap-3">
@@ -200,7 +200,7 @@ export default function SettingsModal({
                   onClick={() => onSaveBrowserApiKey(browserKeyDraft)}
                   className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 >
-                  Key'i Kaydet
+                  Anahtarı Kaydet
                 </button>
                 <button
                   onClick={() => {
@@ -209,13 +209,13 @@ export default function SettingsModal({
                   }}
                   className="rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300"
                 >
-                  Browser Key'i Temizle
+                  Tarayıcı Anahtarını Temizle
                 </button>
               </div>
               <div className="text-xs text-gray-500">
                 {browserApiKey
-                  ? 'Su an browser-key modu aktif. AI gorselleri server yerine bu cihazdaki key ile uretilir.'
-                  : 'Browser key kayitli degil. Kayitli degilse uygulama proxy/server yolunu kullanir.'}
+                  ? 'Şu an tarayıcı anahtarı modu aktif. YZ görselleri sunucu yerine bu cihazdaki anahtar ile üretilir.'
+                  : 'Tarayıcı anahtarı kayıtlı değil. Kayıtlı değilse uygulama proxy/sunucu yolunu kullanır.'}
               </div>
             </div>
           </section>

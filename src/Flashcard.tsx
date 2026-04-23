@@ -44,7 +44,7 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
         >
           {card.imageUrl && studyDirection !== 'TR_TO_DE' ? (
             <div className="w-full h-32 rounded-2xl overflow-hidden mb-4 shrink-0 bg-gray-50 border border-gray-100">
-              <img src={card.imageUrl} alt="Mnemonic" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+              <img src={card.imageUrl} alt="Hatırlatıcı görsel" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
             </div>
           ) : (
             <div className="flex-1" />
@@ -89,7 +89,7 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
             <div className="mt-4 flex flex-col w-full px-2">
                {card.wordType === 'noun' && card.plural && (
                   <div className="flex items-center justify-between py-2 border-t border-gray-100/80">
-                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Plural</span>
+                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Çoğul</span>
                      <span className="text-[15px] font-medium text-gray-800">{card.plural}</span>
                   </div>
                )}
@@ -109,13 +109,13 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
                          <div className="text-[13px] font-medium text-gray-800 px-0.5">{card.verbForms.auxiliary ? (card.verbForms.auxiliary === 'sein' ? 'ist ' : card.verbForms.auxiliary === 'haben' ? 'hat ' : card.verbForms.auxiliary + ' ') : ''}{card.verbForms.participle || '-'}</div>
                        </div>
                        <div className="bg-gray-50/80 rounded-xl p-2.5 border border-gray-100">
-                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Imperative</div>
+                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Imperativ</div>
                          <div className="text-[13px] font-medium text-gray-800 px-0.5">{card.verbForms.imperative || '-'}</div>
                        </div>
                     </div>
                     {card.verbForms.usagePattern && (
                       <div className="bg-blue-50/50 rounded-xl p-2.5 border border-blue-100/50 text-left">
-                         <div className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Pattern</div>
+                         <div className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Kalıp</div>
                          <div className="text-[13px] font-medium text-blue-900 px-0.5">{card.verbForms.usagePattern}</div>
                       </div>
                     )}
@@ -124,16 +124,16 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
                {card.wordType === 'adjective' && card.adjectiveForms && (
                   <div className="flex flex-col items-center gap-1.5 w-full mt-2">
                     <div className="flex justify-between w-full py-2 border-t border-gray-100/80">
-                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest self-center">Comp.</span>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest self-center">Komp.</span>
                       <span className="text-[14px] font-medium text-gray-800">{card.adjectiveForms.comparative || '-'}</span>
                     </div>
                     <div className="flex justify-between w-full py-2 border-t border-gray-100/80">
-                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest self-center">Superlative</span>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest self-center">Superlativ</span>
                       <span className="text-[14px] font-medium text-gray-800">{card.adjectiveForms.superlative || '-'}</span>
                     </div>
                     {card.adjectiveForms.usage && (
                        <div className="flex justify-between w-full py-2 border-t border-gray-100/80 text-left">
-                         <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest self-center">Usage</span>
+                         <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest self-center">Kullanım</span>
                          <span className="text-[14px] font-medium text-gray-800 text-right">{card.adjectiveForms.usage}</span>
                        </div>
                     )}
@@ -207,7 +207,7 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
             
             {card.note && (
               <div className="mt-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 w-full text-left">
-                 <div className="text-amber-500/80 text-[10px] uppercase font-bold tracking-widest mb-1.5">Note</div>
+                 <div className="text-amber-500/80 text-[10px] uppercase font-bold tracking-widest mb-1.5">Not</div>
                  <p className="text-amber-200/90 text-sm font-medium leading-relaxed">{card.note}</p>
               </div>
             )}

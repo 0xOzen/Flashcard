@@ -39,7 +39,7 @@ export default function InstallBanner({ onDismiss }: InstallBannerProps) {
               <span className="text-gray-300">→</span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5">
                 <SquarePlus size={14} className="text-blue-500" />
-                Add to Home Screen
+                Ana Ekrana Ekle
               </span>
               <span className="text-gray-300">→</span>
               <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5">
