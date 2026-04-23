@@ -157,13 +157,13 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
               </select>
             </div>
             <div>
-              <Label>PRESENT 3RD SINGULAR</Label>
+              <Label>PRÄSENS</Label>
               <input value={word.verbForms?.present || ''} onChange={(e) => updateVerbForm('present', e.target.value)} disabled={isDefault} 
                      placeholder="er/sie/es geht"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
             </div>
             <div>
-              <Label>SIMPLE PAST</Label>
+              <Label>PRÄTERITUM</Label>
               <input value={word.verbForms?.preterite || ''} onChange={(e) => updateVerbForm('preterite', e.target.value)} disabled={isDefault} 
                      placeholder="ging"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />
@@ -171,7 +171,7 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <Label>PAST PARTICIPLE</Label>
+              <Label>PERFEKT</Label>
               <input value={word.verbForms?.participle || ''} onChange={(e) => updateVerbForm('participle', e.target.value)} disabled={isDefault} 
                      placeholder="gegangen"
                      className="w-full bg-white border border-gray-200 rounded-[14px] px-4 py-2.5 text-[15px] font-medium text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 transition-all placeholder:font-normal placeholder:text-gray-400" />

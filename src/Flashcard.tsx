@@ -97,15 +97,15 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
                   <div className="flex flex-col w-full mt-2 space-y-2">
                     <div className="grid grid-cols-2 gap-3 text-left">
                        <div className="bg-gray-50/80 rounded-xl p-2.5 border border-gray-100">
-                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Present (or 3rd)</div>
+                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Präsens</div>
                          <div className="text-[13px] font-medium text-gray-800 px-0.5">{card.verbForms.present ? `er/sie/es ${card.verbForms.present}` : '-'}</div>
                        </div>
                        <div className="bg-gray-50/80 rounded-xl p-2.5 border border-gray-100">
-                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Simple Past</div>
+                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Präteritum</div>
                          <div className="text-[13px] font-medium text-gray-800 px-0.5">{card.verbForms.preterite || '-'}</div>
                        </div>
                        <div className="bg-gray-50/80 rounded-xl p-2.5 border border-gray-100">
-                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Participle</div>
+                         <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 mt-0.5 ml-0.5">Perfekt</div>
                          <div className="text-[13px] font-medium text-gray-800 px-0.5">{card.verbForms.auxiliary ? (card.verbForms.auxiliary === 'sein' ? 'ist ' : card.verbForms.auxiliary === 'haben' ? 'hat ' : card.verbForms.auxiliary + ' ') : ''}{card.verbForms.participle || '-'}</div>
                        </div>
                        <div className="bg-gray-50/80 rounded-xl p-2.5 border border-gray-100">
