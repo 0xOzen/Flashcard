@@ -6,13 +6,15 @@ import FlashcardMode from './screens/FlashcardMode';
 import QuizMode from './screens/QuizMode';
 import WriteMode from './screens/WriteMode';
 import MatchMode from './screens/MatchMode';
-import { Settings } from 'lucide-react';
+import GrammarHub from './screens/GrammarHub';
+import { LibraryBig, Settings } from 'lucide-react';
 import InstallBanner from './components/InstallBanner';
 import SettingsModal from './components/SettingsModal';
 import ConnectivityBadge from './components/ConnectivityBadge';
 
 export type Screen = 
   | { type: 'dashboard' }
+  | { type: 'grammar' }
   | { type: 'edit_list', listId: string }
   | { type: 'study', mode: 'flashcard' | 'quiz' | 'write' | 'match', listId: string };
 
@@ -85,6 +87,17 @@ export default function App() {
           <span className="text-xl font-medium tracking-tight text-[#1d1d1f]">WortSchatz</span>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate({ type: 'grammar' })}
+            className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
+              currentScreen.type === 'grammar'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-black/5 bg-white text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <LibraryBig size={16} />
+            Gramer
+          </button>
           <ConnectivityBadge isOnline={isOnline} />
           <button
             onClick={() => setIsSettingsOpen(true)}
@@ -99,6 +112,7 @@ export default function App() {
       <div className="flex-1 overflow-auto relative">
         {!installHintDismissed && <InstallBanner onDismiss={dismissInstallHint} />}
         {currentScreen.type === 'dashboard' && <Dashboard onNavigate={navigate} />}
+        {currentScreen.type === 'grammar' && <GrammarHub onNavigate={navigate} />}
         {currentScreen.type === 'edit_list' && <ListEditor listId={currentScreen.listId} onNavigate={navigate} />}
         {currentScreen.type === 'study' && currentScreen.mode === 'flashcard' && <FlashcardMode listId={currentScreen.listId} onNavigate={navigate} />}
         {currentScreen.type === 'study' && currentScreen.mode === 'quiz' && <QuizMode listId={currentScreen.listId} onNavigate={navigate} />}

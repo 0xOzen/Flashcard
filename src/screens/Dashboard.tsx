@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useApp } from '../AppContext';
 import { Screen } from '../App';
-import { Plus, Edit2, Play, Grid2X2, PenTool, LayoutTemplate, ChevronRight, Flame } from 'lucide-react';
+import { Plus, Edit2, Play, Grid2X2, PenTool, LayoutTemplate, ChevronRight, Flame, LibraryBig } from 'lucide-react';
+import { GRAMMAR_SECTIONS, GRAMMAR_TOPICS } from '../grammarData';
 
 export default function Dashboard({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
   const { lists, getOverallProgress, getDifficultWordsList } = useApp();
@@ -26,6 +27,42 @@ export default function Dashboard({ onNavigate }: { onNavigate: (screen: Screen)
              <span className="text-2xl font-semibold text-blue-600">{totalStudied}</span>
              <span className="text-[11px] font-medium text-blue-600/70 uppercase tracking-wide mt-1">Kelime Çalışıldı</span>
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-[32px] border border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(236,253,245,0.95),_rgba(255,255,255,0.98),_rgba(254,243,199,0.9))] p-8 shadow-[0_18px_60px_rgba(16,185,129,0.08)]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              <LibraryBig size={14} />
+              Yeni Alan
+            </div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900">Gramer Atlası</h2>
+            <p className="mt-3 text-base leading-7 text-gray-600">
+              Görsellerdeki tüm gramer başlıklarını tek bir sayfada topladım. Bölüm, seviye ve konu bazında gezebilir; her başlık için Türkçe özet, örnek ve dikkat noktalarını inceleyebilirsin.
+            </p>
+          </div>
+
+          <button
+            onClick={() => onNavigate({ type: 'grammar' })}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-700"
+          >
+            <LibraryBig size={16} />
+            Grameri Aç
+          </button>
+        </div>
+
+        <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-white/80 bg-white/80 px-5 py-4 shadow-sm">
+            <div className="text-2xl font-semibold text-gray-900">{GRAMMAR_TOPICS.length}</div>
+            <div className="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Toplam konu</div>
+          </div>
+          {GRAMMAR_SECTIONS.slice(0, 3).map((section) => (
+            <div key={section.id} className="rounded-2xl border border-white/80 bg-white/80 px-5 py-4 shadow-sm">
+              <div className="text-sm font-semibold text-gray-900">{section.title}</div>
+              <div className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">{section.titleTr}</div>
+            </div>
+          ))}
         </div>
       </section>
 
