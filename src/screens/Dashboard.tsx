@@ -82,6 +82,20 @@ export default function Dashboard({ selectedListId, onSelectList, onNavigate }: 
         </button>
       </div>
 
+      <button
+        onClick={() => onNavigate({ type: 'study', mode: 'write', listId: primaryList.id })}
+        className="mb-4 flex w-full items-center gap-3 rounded-[14px] border border-claude-border bg-claude-panel/80 px-4 py-4 text-left shadow-soft transition-colors hover:border-claude-accent/40 hover:bg-claude-panel"
+      >
+        <span className="codex-action-icon">
+          <PenLine size={16} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-claude-text">Devam et</span>
+          <span className="mt-0.5 block truncate text-xs text-claude-muted">{primaryList.title} · Yazma pratiği</span>
+        </span>
+        <ArrowRight size={16} className="text-claude-muted" />
+      </button>
+
       <section className="codex-panel overflow-hidden rounded-[14px]">
         <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center">
           <span className="codex-action-icon">

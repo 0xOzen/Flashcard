@@ -36,13 +36,13 @@ async function generateViaBrowserKey(
 
     return {
       ok: false,
-      error: 'Model gorsel donmedi. Farkli bir model veya farkli bir terim dene.',
+      error: 'Model görsel dönmedi. Farklı bir model veya farklı bir terim dene.',
     };
   } catch (error) {
     console.error('Browser-key image generation failed:', error);
     return {
       ok: false,
-      error: 'Tarayici uzerinden AI cagrisi basarisiz oldu. API key ve kota durumunu kontrol et.',
+      error: 'Tarayıcı üzerinden AI çağrısı başarısız oldu. API key ve kota durumunu kontrol et.',
     };
   }
 }
@@ -56,7 +56,7 @@ export async function generateImageMnemonic(
   if (!navigator.onLine) {
     return {
       ok: false,
-      error: 'Cihaz su an cevrimdisi. AI gorsel uretimi icin internet baglantisi gerekiyor.',
+      error: 'Cihaz şu an çevrimdışı. AI görsel üretimi için internet bağlantısı gerekiyor.',
     };
   }
 
@@ -82,7 +82,7 @@ export async function generateImageMnemonic(
       const payload = (await response.json().catch(() => ({}))) as { error?: string };
       return {
         ok: false,
-        error: payload.error || 'AI servisi su anda yanit veremiyor.',
+        error: payload.error || 'AI servisi şu anda yanıt veremiyor.',
       };
     }
 
@@ -90,7 +90,7 @@ export async function generateImageMnemonic(
     if (!payload.imageUrl) {
       return {
         ok: false,
-        error: 'Model gorsel donmedi. Farkli bir model veya farkli bir terim dene.',
+        error: 'Model görsel dönmedi. Farklı bir model veya farklı bir terim dene.',
       };
     }
 
@@ -102,7 +102,7 @@ export async function generateImageMnemonic(
     console.error('Failed to generate image:', error);
     return {
       ok: false,
-      error: 'AI servisine baglanirken bir hata olustu. API sunucusunun calistigindan emin ol.',
+      error: 'AI servisine bağlanırken bir hata oluştu. API sunucusunun çalıştığından emin ol.',
     };
   }
 }

@@ -286,6 +286,19 @@ export default function App() {
                       </option>
                     ))}
                   </select>
+                  <div className="nav-level-filter mt-2" aria-label="Gramer seviyesi">
+                    {(['ALL', 'A1', 'A2', 'B1'] as GrammarLevelFilter[]).map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setGrammarLevelFilter(level)}
+                        className={grammarLevelFilter === level ? 'active' : ''}
+                        aria-pressed={grammarLevelFilter === level}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-0.5">
                   {grammarTopicOptions.length === 0 ? (

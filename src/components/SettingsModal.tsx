@@ -24,17 +24,17 @@ const MODEL_OPTIONS: Array<{
   {
     id: 'gemini-3.1-flash-image-preview',
     title: 'Nano Banana 2',
-    description: 'Genel kullanim icin hizli ve kaliteli varsayilan secim.',
+    description: 'Genel kullanım için hızlı ve kaliteli varsayılan seçim.',
   },
   {
     id: 'gemini-2.5-flash-image',
     title: 'Nano Banana',
-    description: 'Daha ekonomik ve hiz odakli secenek.',
+    description: 'Daha ekonomik ve hız odaklı seçenek.',
   },
   {
     id: 'gemini-3-pro-image-preview',
     title: 'Nano Banana Pro',
-    description: 'Daha agir ama daha yuksek kalite ve talimat takibi.',
+    description: 'Daha ağır ama daha yüksek kalite ve talimat takibi.',
   },
 ];
 
@@ -104,25 +104,22 @@ export default function SettingsModal({
     >
       <div
         ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
         className="panel-surface-strong max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-hidden rounded-[18px]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-claude-border px-6 py-5">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-teal-700">Ayarlar</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-claude-text">AI ve kurulum</h2>
+            <h2 id="settings-title" className="mt-2 text-3xl font-semibold tracking-tight text-claude-text">AI ve kurulum</h2>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="button-secondary px-4 py-2.5"
-            >
-              Kapat
-            </button>
+          <div className="flex items-center">
             <button
               onClick={onClose}
               className="rounded-full border border-claude-border bg-claude-surface p-2 text-claude-muted transition-colors hover:text-claude-text"
-              aria-label="Ayarlari kapat"
+              aria-label="Ayarları kapat"
             >
               <X size={18} />
             </button>
@@ -139,8 +136,8 @@ export default function SettingsModal({
               isOnline ? 'border-emerald-200 bg-emerald-50/80 text-emerald-700' : 'border-amber-200 bg-amber-50/80 text-amber-700'
             }`}>
               {isOnline
-                ? 'AI gorsel uretimi icin baglanti hazir.'
-                : 'Cevrimdisisin. Kelime verileri lokal calisir, AI gorsel uretimi beklemeye alinmali.'}
+                ? 'AI görsel üretimi için bağlantı hazır.'
+                : 'Çevrimdışısın. Kelime verileri lokal çalışır, AI görsel üretimi beklemeye alınmalı.'}
             </div>
             <div className="space-y-3">
               {MODEL_OPTIONS.map((option) => {
@@ -226,25 +223,25 @@ export default function SettingsModal({
               <h3 className="text-lg font-semibold tracking-tight text-claude-text">Lokal Yedek</h3>
             </div>
             <p className="text-sm leading-6 text-claude-subtle">
-              Tum listelerini, istatistiklerini ve ayarlarini JSON dosyasi olarak disa aktarabilir veya daha once aldigin bir yedegi geri yukleyebilirsin.
+              Tüm listelerini, istatistiklerini ve ayarlarını JSON dosyası olarak dışa aktarabilir veya daha önce aldığın bir yedeği geri yükleyebilirsin.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => {
                   onExportBackup();
-                  setBackupMessage('Yedek dosyasi indirildi.');
+                  setBackupMessage('Yedek dosyası indirildi.');
                 }}
                 className="button-primary"
               >
                 <Download size={16} />
-                Yedegi Indir
+                Yedeği indir
               </button>
               <button
                 onClick={handleImportClick}
                 className="button-secondary"
               >
                 <FolderUp size={16} />
-                Yedek Ice Aktar
+                Yedek içe aktar
               </button>
             </div>
             <input
@@ -264,16 +261,16 @@ export default function SettingsModal({
           <section className="rounded-[18px] border border-claude-border bg-claude-surface p-5">
             <div className="mb-2 flex items-center gap-2">
               <Sparkles size={18} className="text-amber-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-claude-text">iPad Kurulum Yardimi</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-claude-text">iPad kurulum yardımı</h3>
             </div>
             <p className="text-sm leading-6 text-claude-subtle">
-              Banneri tekrar gostermek veya kullaniciya ana ekrana ekleme akisini hatirlatmak icin bu dugmeyi kullanabilirsin.
+              Bannerı tekrar göstermek veya kullanıcıya ana ekrana ekleme akışını hatırlatmak için bu düğmeyi kullanabilirsin.
             </p>
             <button
               onClick={onShowInstallHint}
               className="button-secondary mt-4"
             >
-              Kurulum Yardimini Tekrar Goster
+              Kurulum yardımını tekrar göster
             </button>
           </section>
         </div>

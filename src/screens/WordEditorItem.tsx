@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Flashcard, WordType } from '../types';
-import { Trash2, ImagePlus, Loader2 } from 'lucide-react';
+import { ChevronDown, Trash2, ImagePlus, Loader2 } from 'lucide-react';
 import { generateImageMnemonic } from '../services/gemini';
 import { useApp } from '../AppContext';
 
@@ -22,6 +22,18 @@ const inputClassName =
 const textareaClassName = `${inputClassName} min-h-[96px] resize-y`;
 
 export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: WordEditorItemProps) {
+  const hasAdvancedFields = Boolean(
+    word.article ||
+      word.plural ||
+      word.verbForms ||
+      word.adjectiveForms ||
+      word.phraseForms ||
+      word.example ||
+      word.exampleTranslation ||
+      word.note ||
+      word.imageUrl,
+  );
+  const [showDetails, setShowDetails] = useState(hasAdvancedFields);
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const { aiModel, browserApiKey } = useApp();
@@ -140,6 +152,18 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
         </div>
       </div>
 
+      <button
+        type="button"
+        onClick={() => setShowDetails((previous) => !previous)}
+        className="mt-5 flex w-full items-center justify-between rounded-[12px] border border-claude-border bg-claude-surface px-3 py-2.5 text-left text-sm font-semibold text-claude-subtle transition-colors hover:text-claude-text"
+        aria-expanded={showDetails}
+      >
+        <span>Detaylar</span>
+        <ChevronDown size={16} className={`transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+      </button>
+
+      {showDetails ? (
+        <>
       {word.wordType === 'noun' ? (
         <div className="mt-5 grid gap-5 border-t border-claude-border pt-5 md:grid-cols-2">
           <div>
@@ -277,6 +301,8 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
       </div>
 
       {imageError ? <div className="mt-4 rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{imageError}</div> : null}
+        </>
+      ) : null}
     </div>
   );
 }

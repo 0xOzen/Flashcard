@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowDownUp, Check, ChevronLeft, Shuffle, Undo2, X } from 'lucide-react';
+import { Check, Shuffle, Undo2, X } from 'lucide-react';
 import { useApp } from '../AppContext';
 import { Screen } from '../App';
 import Flashcard from '../Flashcard';
+import StudyModeShell from '../components/StudyModeShell';
+import StudyCompletionCard from '../components/StudyCompletionCard';
 
 function getDirectionLabel(direction?: 'DE_TO_TR' | 'TR_TO_DE') {
   return direction === 'TR_TO_DE' ? 'TR -> DE' : 'DE -> TR';
@@ -72,94 +74,86 @@ export default function FlashcardMode({ listId, onNavigate }: { listId: string; 
   };
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col items-center justify-center px-4 py-6 text-gray-900">
-      <div className="w-full max-w-sm space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => onNavigate({ type: 'dashboard' })} className="flex items-center text-stone-500 transition-colors hover:text-stone-200">
-              <ChevronLeft size={24} strokeWidth={1.5} />
+    <StudyModeShell
+      modeLabel="Kartlar"
+      title="Kartla hızlı hatırlama"
+      description="Kartı çevir, cevabı gör ve kelimeyi bildiğini ya da zorlandığını işaretle."
+      listTitle={list.title}
+      progress={progress}
+      currentIndex={isComplete ? deck.length - 1 : currentIndex}
+      total={deck.length}
+      onBack={() => onNavigate({ type: 'dashboard' })}
+      directionLabel={studyDirection === 'TR_TO_DE' ? 'TR → DE' : 'DE → TR'}
+      onToggleDirection={toggleStudyDirection}
+      accentClassName="teal"
+      stats={[
+        { label: 'Bilinen', value: `${knownCount}` },
+        { label: 'Zorlanan', value: `${unknownCount}` },
+        { label: 'Liste', value: list.title },
+      ]}
+      footer={
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
+          <div className="text-sm leading-7 text-claude-subtle">Kartı tıklayarak veya klavyede Enter/Space ile çevirebilirsin.</div>
+          <div className="flex items-center gap-2">
+            <button onClick={actions.shuffle} className="button-secondary" title="Karıştır">
+              <Shuffle size={16} />
+              Karıştır
+            </button>
+            <button onClick={actions.reset} className="button-secondary" title="Baştan al">
+              <Undo2 size={16} />
+              Baştan al
+            </button>
+          </div>
+        </div>
+      }
+    >
+      {isComplete ? (
+        <StudyCompletionCard
+          title="Kart turu tamamlandı"
+          description="Bu turdaki kartları bitirdin. Zorlandıkların otomatik olarak zor kelimeler listesine yaklaşır."
+          primaryLabel="Baştan al"
+          onPrimary={actions.reset}
+          secondaryLabel="Panele dön"
+          onSecondary={() => onNavigate({ type: 'dashboard' })}
+          summary={[
+            { label: 'Bilinen', value: `${knownCount}` },
+            { label: 'Zorlanan', value: `${unknownCount}` },
+            { label: 'Toplam', value: `${deck.length}` },
+          ]}
+        />
+      ) : (
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-7 py-2">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${currentCard.id}-${currentIndex}-${studyDirection || ''}`}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="w-full"
+            >
+              <Flashcard card={currentCard} studyDirection={studyDirection} />
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="flex w-full max-w-sm items-center justify-center gap-4">
+            <button
+              onClick={handleUnknown}
+              className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-[14px] border border-claude-border bg-claude-panel px-4 text-sm font-semibold text-claude-subtle transition-colors hover:border-claude-danger/50 hover:text-claude-danger"
+            >
+              <X size={18} />
+              Zorlandım
             </button>
             <button
-              onClick={toggleStudyDirection}
-              className="flex items-center justify-center rounded-lg border border-transparent p-1.5 text-stone-500 transition-colors hover:border-white/10 hover:bg-white/[0.04] hover:text-stone-200"
-              title="Yönü çevir"
+              onClick={handleKnown}
+              className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-[14px] border border-claude-border bg-claude-panel px-4 text-sm font-semibold text-claude-subtle transition-colors hover:border-claude-success/50 hover:text-claude-success"
             >
-              <ArrowDownUp size={18} strokeWidth={2} />
-              <span className="ml-1.5 hidden text-[10px] font-bold uppercase tracking-widest sm:inline">{getDirectionLabel(studyDirection)}</span>
+              <Check size={18} />
+              Bildim
             </button>
           </div>
-          <div className="text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-stone-500">{list.title}</div>
-            <div className="mt-1 text-xs font-semibold tracking-widest text-stone-400">
-              {Math.min(currentIndex + 1, deck.length)} / {deck.length}
-            </div>
-          </div>
         </div>
-
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-          <motion.div className="h-full rounded-full bg-white/75" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
-        </div>
-      </div>
-
-      <div className="mt-8 w-full">
-        {isComplete ? (
-          <div className="mx-auto flex max-w-sm flex-col items-center text-center">
-            <div className="text-lg font-medium text-stone-100">Kart turu tamamlandı.</div>
-            <div className="mt-3 text-sm leading-7 text-stone-400">
-              Bilinen: {knownCount} · Zorlanan: {unknownCount}
-            </div>
-            <div className="mt-6 flex items-center gap-4">
-              <button onClick={actions.reset} className="button-primary">
-                Baştan al
-              </button>
-              <button onClick={() => onNavigate({ type: 'dashboard' })} className="button-secondary">
-                Panele dön
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${currentCard.id}-${currentIndex}-${studyDirection || ''}`}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.2 }}
-                className="w-full"
-              >
-                <Flashcard card={currentCard} studyDirection={studyDirection} />
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="mx-auto mt-12 flex w-full max-w-sm flex-col gap-6">
-              <div className="flex items-center justify-center gap-6">
-                <button
-                  onClick={handleUnknown}
-                  className="flex h-16 w-16 items-center justify-center rounded-full border border-gray-100 bg-white text-gray-400 shadow-[0_2px_15px_rgba(0,0,0,0.04)] transition-all hover:bg-gray-50 hover:text-red-500"
-                >
-                  <X size={24} strokeWidth={2} />
-                </button>
-                <button
-                  onClick={handleKnown}
-                  className="flex h-16 w-16 items-center justify-center rounded-full border border-gray-100 bg-white text-gray-400 shadow-[0_2px_15px_rgba(0,0,0,0.04)] transition-all hover:bg-gray-50 hover:text-green-500"
-                >
-                  <Check size={24} strokeWidth={2} />
-                </button>
-              </div>
-
-              <div className="mt-2 flex items-center justify-center gap-8">
-                <button onClick={actions.shuffle} className="text-stone-500 transition-colors hover:text-stone-200" title="Karıştır">
-                  <Shuffle size={20} strokeWidth={1.5} />
-                </button>
-                <button onClick={actions.reset} className="text-stone-500 transition-colors hover:text-stone-200" title="Baştan al">
-                  <Undo2 size={20} strokeWidth={1.5} />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+      )}
+    </StudyModeShell>
   );
 }

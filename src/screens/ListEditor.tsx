@@ -50,7 +50,7 @@ export default function ListEditor({ listId, onNavigate }: { listId: string; onN
   };
 
   return (
-    <div className="mx-auto grid w-full max-w-[1440px] gap-4 px-3 py-3 sm:px-5 sm:py-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:px-8">
+    <div className="mx-auto grid w-full max-w-[1440px] gap-4 px-3 pb-24 pt-3 sm:px-5 sm:py-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:px-8">
       <section className="panel-surface min-w-0 rounded-[18px] p-3 sm:p-5">
         <div className="mb-5 flex flex-col gap-3 border-b border-claude-border pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
@@ -192,6 +192,19 @@ export default function ListEditor({ listId, onNavigate }: { listId: string; onN
           </div>
         </div>
       </aside>
+
+      <div className="fixed inset-x-3 bottom-3 z-30 flex gap-2 rounded-[14px] border border-claude-border bg-claude-panel/95 p-2 shadow-pop backdrop-blur sm:hidden">
+        {!existingList?.isDefault ? (
+          <button onClick={addWord} className="button-secondary min-h-11 flex-1">
+            <Plus size={16} />
+            Kelime ekle
+          </button>
+        ) : null}
+        <button onClick={handleSave} className="button-primary min-h-11 flex-1">
+          <Save size={16} />
+          Kaydet
+        </button>
+      </div>
     </div>
   );
 }
