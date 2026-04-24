@@ -391,6 +391,18 @@ export default function App() {
         </aside>
       ) : null}
 
+      {!isStudyScreen && !isSidebarOpen ? (
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen(true)}
+          className="mobile-sidebar-fab"
+          title="Sidebar'ı göster"
+          aria-label="Sidebar'ı göster"
+        >
+          <PanelLeft size={18} />
+        </button>
+      ) : null}
+
       <main className="main-surface relative z-[1] flex min-w-0 flex-1 flex-col">
         {!isStudyScreen && (
           <header className="topbar-surface sticky top-0 z-10 flex h-14 items-center justify-between px-4">
@@ -398,7 +410,7 @@ export default function App() {
               {!isSidebarOpen ? (
                 <button
                   onClick={() => setIsSidebarOpen(true)}
-                  className="sidebar-toggle-btn"
+                  className="sidebar-toggle-btn hidden sm:inline-flex"
                   title="Sidebar'ı göster"
                   aria-label="Sidebar'ı göster"
                 >
