@@ -65,3 +65,50 @@ export type AppState = {
   browserApiKey?: string;
   installHintDismissed?: boolean;
 };
+
+export type GrammarLevel = 'A1' | 'A2' | 'B1';
+
+export type GrammarSectionId =
+  | 'verben'
+  | 'nomen-artikel-pronomen'
+  | 'adjektive-adverbien'
+  | 'praepositionen'
+  | 'wortbildung'
+  | 'einfache-saetze'
+  | 'zusammengesetzte-saetze';
+
+export type GrammarSource = {
+  id: string;
+  title: string;
+  url: string;
+  provider: string;
+};
+
+export type GrammarTopicExample = {
+  de: string;
+  tr: string;
+};
+
+export type GrammarTopic = {
+  id: string;
+  chapter: number;
+  sectionId: GrammarSectionId;
+  title: string;
+  titleTr: string;
+  levels: GrammarLevel[];
+  summary: string;
+  pattern?: string;
+  highlights: string[];
+  examples: GrammarTopicExample[];
+  pitfalls: string[];
+};
+
+export type GrammarSection = {
+  id: GrammarSectionId;
+  title: string;
+  titleTr: string;
+  color: string;
+  accentClassName: string;
+  summary: string;
+  sourceIds: string[];
+};

@@ -24,17 +24,17 @@ const MODEL_OPTIONS: Array<{
   {
     id: 'gemini-3.1-flash-image-preview',
     title: 'Nano Banana 2',
-    description: 'Genel kullanim icin hizli ve kaliteli varsayilan secim.',
+    description: 'Genel kullanım için hızlı ve kaliteli varsayılan seçim.',
   },
   {
     id: 'gemini-2.5-flash-image',
     title: 'Nano Banana',
-    description: 'Daha ekonomik ve hiz odakli secenek.',
+    description: 'Daha ekonomik ve hız odaklı seçenek.',
   },
   {
     id: 'gemini-3-pro-image-preview',
     title: 'Nano Banana Pro',
-    description: 'Daha agir ama daha yuksek kalite ve talimat takibi.',
+    description: 'Daha ağır ama daha yüksek kalite ve talimat takibi.',
   },
 ];
 
@@ -99,48 +99,45 @@ export default function SettingsModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/25 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/35 p-4 backdrop-blur-md"
       onClick={onClose}
     >
       <div
         ref={panelRef}
-        className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-white/60 bg-[#fbfbfd] shadow-[0_20px_80px_rgba(0,0,0,0.18)]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+        className="panel-surface-strong max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-hidden rounded-[18px]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-black/5 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-claude-border px-6 py-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Ayarlar</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#1d1d1f]">AI ve Kurulum</h2>
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-teal-700">Ayarlar</p>
+            <h2 id="settings-title" className="mt-2 text-3xl font-semibold tracking-tight text-claude-text">AI ve kurulum</h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <button
               onClick={onClose}
-              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300"
-            >
-              Kapat
-            </button>
-            <button
-              onClick={onClose}
-              className="rounded-full border border-gray-200 bg-white p-2 text-gray-500 transition-colors hover:text-gray-800"
-              aria-label="Ayarlari kapat"
+              className="rounded-full border border-claude-border bg-claude-surface p-2 text-claude-muted transition-colors hover:text-claude-text"
+              aria-label="Ayarları kapat"
             >
               <X size={18} />
             </button>
           </div>
         </div>
 
-        <div className="space-y-8 px-6 py-6">
+        <div className="custom-scroll max-h-[calc(100vh-9rem)] space-y-6 overflow-y-auto px-6 py-6">
           <section>
             <div className="mb-4 flex items-center gap-2">
-              <Bot size={18} className="text-blue-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900">YZ Görsel Modeli</h3>
+              <Bot size={18} className="text-teal-600" />
+              <h3 className="text-lg font-semibold tracking-tight text-claude-text">YZ Görsel Modeli</h3>
             </div>
-            <div className={`mb-4 rounded-2xl border px-4 py-3 text-sm ${
-              isOnline ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'
+            <div className={`mb-4 rounded-[22px] border px-4 py-3 text-sm ${
+              isOnline ? 'border-emerald-200 bg-emerald-50/80 text-emerald-700' : 'border-amber-200 bg-amber-50/80 text-amber-700'
             }`}>
               {isOnline
-                ? 'AI gorsel uretimi icin baglanti hazir.'
-                : 'Cevrimdisisin. Kelime verileri lokal calisir, AI gorsel uretimi beklemeye alinmali.'}
+                ? 'AI görsel üretimi için bağlantı hazır.'
+                : 'Çevrimdışısın. Kelime verileri lokal çalışır, AI görsel üretimi beklemeye alınmalı.'}
             </div>
             <div className="space-y-3">
               {MODEL_OPTIONS.map((option) => {
@@ -149,39 +146,39 @@ export default function SettingsModal({
                   <button
                     key={option.id}
                     onClick={() => onModelChange(option.id)}
-                    className={`w-full rounded-2xl border px-4 py-4 text-left transition-all ${
+                    className={`w-full rounded-[24px] border px-4 py-4 text-left transition-all ${
                       isSelected
-                        ? 'border-blue-300 bg-blue-50 shadow-[0_10px_30px_rgba(59,130,246,0.08)]'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                        ? 'border-teal-300 bg-teal-50/70 shadow-[0_14px_32px_rgba(13,148,136,0.1)]'
+                        : 'border-claude-border bg-claude-surface hover:border-claude-accent/40'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <div className="text-base font-semibold text-gray-900">{option.title}</div>
-                        <div className="mt-1 text-sm text-gray-500">{option.description}</div>
+                        <div className="text-base font-semibold text-claude-text">{option.title}</div>
+                        <div className="mt-1 text-sm text-claude-muted">{option.description}</div>
                       </div>
                       {isSelected && (
-                        <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                          Secili
+                        <span className="rounded-full bg-teal-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                          Seçili
                         </span>
                       )}
                     </div>
-                    <div className="mt-2 text-xs text-gray-400">{option.id}</div>
+                    <div className="mt-2 text-xs text-claude-muted">{option.id}</div>
                   </button>
                 );
               })}
             </div>
           </section>
 
-          <section className="rounded-3xl border border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-sky-50 p-5">
+          <section className="rounded-[18px] border border-claude-border bg-claude-surface p-5">
             <div className="mb-2 flex items-center gap-2">
-              <KeyRound size={18} className="text-blue-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900">Kolay Mod: Tarayıcı API Anahtarı</h3>
+              <KeyRound size={18} className="text-sky-600" />
+              <h3 className="text-lg font-semibold tracking-tight text-claude-text">Kolay Mod: Tarayıcı API Anahtarı</h3>
             </div>
-            <p className="text-sm leading-6 text-gray-600">
+            <p className="text-sm leading-6 text-claude-subtle">
               Buraya kendi Gemini API anahtarını girersen YZ görsel üretimi doğrudan tarayıcı üzerinden çalışır. Bu, sunucu kurmadan kullanmanın en kolay yoludur.
             </p>
-            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="mt-4 rounded-[22px] border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-800">
               <div className="flex items-start gap-2">
                 <ShieldAlert size={16} className="mt-0.5 shrink-0" />
                 <span>Bu mod sadece kişisel kullanım için uygundur. Anahtar bu cihazda lokal saklanır ve production güvenliği sağlamaz.</span>
@@ -193,12 +190,12 @@ export default function SettingsModal({
                 value={browserKeyDraft}
                 onChange={(event) => setBrowserKeyDraft(event.target.value)}
                 placeholder="Gemini API anahtarı"
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="w-full rounded-[12px] border border-claude-border bg-claude-panel px-4 py-3 text-sm font-medium text-claude-text outline-none transition-all focus:border-claude-accent focus:ring-4 focus:ring-claude-accent/10"
               />
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => onSaveBrowserApiKey(browserKeyDraft)}
-                  className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="button-primary"
                 >
                   Anahtarı Kaydet
                 </button>
@@ -207,12 +204,12 @@ export default function SettingsModal({
                     setBrowserKeyDraft('');
                     onClearBrowserApiKey();
                   }}
-                  className="rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300"
+                  className="button-secondary"
                 >
                   Tarayıcı Anahtarını Temizle
                 </button>
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-claude-muted">
                 {browserApiKey
                   ? 'Şu an tarayıcı anahtarı modu aktif. YZ görselleri sunucu yerine bu cihazdaki anahtar ile üretilir.'
                   : 'Tarayıcı anahtarı kayıtlı değil. Kayıtlı değilse uygulama proxy/sunucu yolunu kullanır.'}
@@ -220,31 +217,31 @@ export default function SettingsModal({
             </div>
           </section>
 
-          <section className="rounded-3xl border border-gray-200 bg-white p-5">
+          <section className="rounded-[18px] border border-claude-border bg-claude-surface p-5">
             <div className="mb-2 flex items-center gap-2">
-              <FolderUp size={18} className="text-blue-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900">Lokal Yedek</h3>
+              <FolderUp size={18} className="text-teal-600" />
+              <h3 className="text-lg font-semibold tracking-tight text-claude-text">Lokal Yedek</h3>
             </div>
-            <p className="text-sm leading-6 text-gray-600">
-              Tum listelerini, istatistiklerini ve ayarlarini JSON dosyasi olarak disa aktarabilir veya daha once aldigin bir yedegi geri yukleyebilirsin.
+            <p className="text-sm leading-6 text-claude-subtle">
+              Tüm listelerini, istatistiklerini ve ayarlarını JSON dosyası olarak dışa aktarabilir veya daha önce aldığın bir yedeği geri yükleyebilirsin.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => {
                   onExportBackup();
-                  setBackupMessage('Yedek dosyasi indirildi.');
+                  setBackupMessage('Yedek dosyası indirildi.');
                 }}
-                className="inline-flex items-center gap-2 rounded-full bg-[#1d1d1f] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black"
+                className="button-primary"
               >
                 <Download size={16} />
-                Yedegi Indir
+                Yedeği indir
               </button>
               <button
                 onClick={handleImportClick}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300"
+                className="button-secondary"
               >
                 <FolderUp size={16} />
-                Yedek Ice Aktar
+                Yedek içe aktar
               </button>
             </div>
             <input
@@ -255,25 +252,25 @@ export default function SettingsModal({
               onChange={handleFileChange}
             />
             {backupMessage && (
-              <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700">
+              <div className="mt-4 rounded-[12px] border border-claude-border bg-claude-panel px-4 py-3 text-sm font-medium text-claude-text">
                 {backupMessage}
               </div>
             )}
           </section>
 
-          <section className="rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-5">
+          <section className="rounded-[18px] border border-claude-border bg-claude-surface p-5">
             <div className="mb-2 flex items-center gap-2">
               <Sparkles size={18} className="text-amber-500" />
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900">iPad Kurulum Yardimi</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-claude-text">iPad kurulum yardımı</h3>
             </div>
-            <p className="text-sm leading-6 text-gray-600">
-              Banneri tekrar gostermek veya kullaniciya ana ekrana ekleme akisini hatirlatmak icin bu dugmeyi kullanabilirsin.
+            <p className="text-sm leading-6 text-claude-subtle">
+              Bannerı tekrar göstermek veya kullanıcıya ana ekrana ekleme akışını hatırlatmak için bu düğmeyi kullanabilirsin.
             </p>
             <button
               onClick={onShowInstallHint}
-              className="mt-4 rounded-full bg-[#1d1d1f] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black"
+              className="button-secondary mt-4"
             >
-              Kurulum Yardimini Tekrar Goster
+              Kurulum yardımını tekrar göster
             </button>
           </section>
         </div>

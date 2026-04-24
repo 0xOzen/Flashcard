@@ -177,13 +177,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setState(migrated);
       return {
         ok: true,
-        message: 'Yedek basariyla ice aktarildi.',
+        message: 'Yedek başarıyla içe aktarıldı.',
       };
     } catch (error) {
       console.error('Backup import failed:', error);
       return {
         ok: false,
-        message: 'Yedek dosyasi okunamadi. Gecerli bir JSON dosyasi sec.',
+        message: 'Yedek dosyası okunamadı. Geçerli bir JSON dosyası seç.',
       };
     }
   };
