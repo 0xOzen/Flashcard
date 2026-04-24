@@ -1,102 +1,215 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '../AppContext';
 import { Screen } from '../App';
-import { ChevronLeft } from 'lucide-react';
 import { Flashcard } from '../types';
+import StudyModeShell from '../components/StudyModeShell';
+import StudyCompletionCard from '../components/StudyCompletionCard';
 
 type CardType = 'GERMAN' | 'TURKISH';
-type GridItem = { id: string; wordId: string; text: string; type: CardType; isMatched: boolean; };
+type GridItem = {
+  id: string;
+  wordId: string;
+  text: string;
+  type: CardType;
+  isMatched: boolean;
+};
 
-export default function MatchMode({ listId, onNavigate }: { listId: string, onNavigate: (screen: Screen) => void }) {
+function createGrid(words: Flashcard[]): GridItem[] {
+  const pool = [...words].sort(() => 0.5 - Math.random()).slice(0, 6);
+  const initialCards: GridItem[] = [];
+
+  pool.forEach((word) => {
+    initialCards.push({ id: crypto.randomUUID(), wordId: word.id, text: word.term, type: 'GERMAN', isMatched: false });
+    initialCards.push({
+      id: crypto.randomUUID(),
+      wordId: word.id,
+      text: word.translationTr || word.translationEn || word.translation || '',
+      type: 'TURKISH',
+      isMatched: false,
+    });
+  });
+
+  return initialCards.sort(() => 0.5 - Math.random());
+}
+
+export default function MatchMode({ listId, onNavigate }: { listId: string; onNavigate: (screen: Screen) => void }) {
   const { lists, recordSuccess, recordFailure, getDifficultWordsList } = useApp();
-  const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find(l => l.id === listId);
+  const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find((item) => item.id === listId);
   const words = list?.words || [];
 
   const [cards, setCards] = useState<GridItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [matchedPairs, setMatchedPairs] = useState(0);
+  const [mistakes, setMistakes] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    if (words.length < 2) return;
-    const pool = [...words].sort(() => 0.5 - Math.random()).slice(0, 6);
-    let initialCards: GridItem[] = [];
-    pool.forEach(w => {
-       initialCards.push({ id: crypto.randomUUID(), wordId: w.id, text: w.term, type: 'GERMAN', isMatched: false });
-       initialCards.push({ id: crypto.randomUUID(), wordId: w.id, text: w.translationTr || w.translationEn || w.translation || '', type: 'TURKISH', isMatched: false });
-    });
-    setCards(initialCards.sort(() => 0.5 - Math.random()));
+    if (words.length < 2) {
+      return;
+    }
+
+    setCards(createGrid(words));
+    setSelectedIds([]);
+    setIsProcessing(false);
+    setMatchedPairs(0);
+    setMistakes(0);
+    setIsComplete(false);
   }, [words]);
 
   if (words.length < 2) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center h-full">
-         <p className="text-gray-500 font-medium mb-6">Eşleştirme oyunu için en az 2 kelime olmalıdır.</p>
-         <button onClick={() => onNavigate({ type: 'dashboard' })} className="px-6 py-2.5 bg-blue-500 text-white rounded-full font-medium transition-colors hover:bg-blue-600">Geri Dön</button>
+      <div className="mx-auto flex min-h-full w-full max-w-xl items-center justify-center px-4 py-10">
+        <div className="panel-surface-strong rounded-[30px] p-8 text-center">
+          <div className="text-2xl font-semibold text-claude-text">Eşleştirme için en az 2 kelime gerekli.</div>
+          <p className="mt-3 text-sm leading-7 text-claude-subtle">Küçük bir liste bile yeterli; birkaç kelime daha eklediğinde oyun akışı açılır.</p>
+          <button onClick={() => onNavigate({ type: 'dashboard' })} className="button-primary mt-6">
+            Panele dön
+          </button>
+        </div>
       </div>
     );
   }
 
+  const totalPairs = cards.length / 2;
+  const progress = totalPairs > 0 ? ((matchedPairs + (isComplete ? 0 : 0)) / totalPairs) * 100 : 0;
+
   const handleCardClick = (card: GridItem) => {
-    if (isProcessing || card.isMatched || selectedIds.includes(card.id)) return;
+    if (isProcessing || card.isMatched || selectedIds.includes(card.id)) {
+      return;
+    }
+
     const newSelected = [...selectedIds, card.id];
     setSelectedIds(newSelected);
 
     if (newSelected.length === 2) {
       setIsProcessing(true);
-      const card1 = cards.find(c => c.id === newSelected[0])!;
-      const card2 = cards.find(c => c.id === newSelected[1])!;
+      const firstCard = cards.find((item) => item.id === newSelected[0]);
+      const secondCard = cards.find((item) => item.id === newSelected[1]);
 
-      if (card1.wordId === card2.wordId && card1.type !== card2.type) {
-        recordSuccess(card1.wordId);
-        setTimeout(() => {
-           setCards(prev => prev.map(c => c.wordId === card1.wordId ? { ...c, isMatched: true } : c));
-           setSelectedIds([]); setIsProcessing(false);
-           const unMatched = cards.filter(c => !c.isMatched && c.wordId !== card1.wordId);
-           if (unMatched.length === 0) setTimeout(() => { alert("Tebrikler!"); onNavigate({ type: 'dashboard' }); }, 500);
-        }, 400);
+      if (!firstCard || !secondCard) {
+        setSelectedIds([]);
+        setIsProcessing(false);
+        return;
+      }
+
+      if (firstCard.wordId === secondCard.wordId && firstCard.type !== secondCard.type) {
+        recordSuccess(firstCard.wordId);
+        window.setTimeout(() => {
+          setCards((previous) => previous.map((item) => (item.wordId === firstCard.wordId ? { ...item, isMatched: true } : item)));
+          setMatchedPairs((previous) => {
+            const nextValue = previous + 1;
+            if (nextValue === totalPairs) {
+              setIsComplete(true);
+            }
+            return nextValue;
+          });
+          setSelectedIds([]);
+          setIsProcessing(false);
+        }, 320);
       } else {
-        recordFailure(card1.wordId);
-        setTimeout(() => { setSelectedIds([]); setIsProcessing(false); }, 800);
+        recordFailure(firstCard.wordId);
+        setMistakes((previous) => previous + 1);
+        window.setTimeout(() => {
+          setSelectedIds([]);
+          setIsProcessing(false);
+        }, 700);
       }
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 flex flex-col h-full w-full">
-      <div className="flex items-center justify-between mb-12">
-        <button onClick={() => onNavigate({ type: 'dashboard' })} className="text-gray-400 hover:text-gray-700 transition-colors">
-          <ChevronLeft size={24} strokeWidth={1.5} />
-        </button>
-        <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest text-center border border-gray-200 px-3 py-1 rounded-full">Eşleştirme</div>
-      </div>
+    <StudyModeShell
+      modeLabel="Eşleştir"
+      title="Kısa tur, yüksek tempo, oyun hissi"
+      description="Almanca ve Türkçe kartları eşleyerek özellikle hızlı tekrar ve dikkat tazeleme için güçlü bir mod oluşturur."
+      listTitle={list?.title || 'Liste'}
+      progress={progress}
+      currentIndex={matchedPairs}
+      total={Math.max(totalPairs, 1)}
+      onBack={() => onNavigate({ type: 'dashboard' })}
+      accentClassName="rose"
+      progressNote="Doğru eşleşmeler sahneden kalkar; yanlış seçimler kısa bir gecikmeyle geri kapanır ve tempo korunur."
+      stats={[
+        { label: 'Çift', value: `${matchedPairs}/${totalPairs}` },
+        { label: 'Hata', value: `${mistakes}` },
+        { label: 'Kart', value: `${cards.length}` },
+        { label: 'Liste', value: list?.title || '-' },
+      ]}
+      footer={
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm leading-7 text-claude-subtle">Önce Almanca ya da Türkçe fark etmez; iki kart açtığında eşleşme varsa kartlar sahneden çıkar.</div>
+          <button
+            onClick={() => {
+              setCards(createGrid(words));
+              setSelectedIds([]);
+              setIsProcessing(false);
+              setMatchedPairs(0);
+              setMistakes(0);
+              setIsComplete(false);
+            }}
+            className="button-secondary self-start"
+          >
+            Turu yenile
+          </button>
+        </div>
+      }
+    >
+      {isComplete ? (
+        <StudyCompletionCard
+          title="Eşleştirme turu bitti"
+          description="Hızlı tekrar başarıyla tamamlandı. İstersen yeni bir karışım açabilir ya da kart moduna geçip derin tekrar yapabilirsin."
+          primaryLabel="Yeni tur"
+          onPrimary={() => {
+            setCards(createGrid(words));
+            setSelectedIds([]);
+            setIsProcessing(false);
+            setMatchedPairs(0);
+            setMistakes(0);
+            setIsComplete(false);
+          }}
+          secondaryLabel="Panele dön"
+          onSecondary={() => onNavigate({ type: 'dashboard' })}
+          summary={[
+            { label: 'Çift', value: `${totalPairs}` },
+            { label: 'Hata', value: `${mistakes}` },
+            { label: 'Kart', value: `${cards.length}` },
+          ]}
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-4">
+          {cards.map((card) => {
+            const isSelected = selectedIds.includes(card.id);
+            let buttonClassName = 'border-claude-border bg-claude-surface text-claude-text hover:border-claude-accent/50 hover:-translate-y-0.5';
 
-      <div className="flex-1 flex items-center justify-center">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
-          {cards.map(card => {
-             const isSelected = selectedIds.includes(card.id);
-             let btnClass = "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-[0_2px_10px_rgba(0,0,0,0.02)]";
-             
-             if (card.isMatched) btnClass = "opacity-0 pointer-events-none scale-95";
-             else if (isSelected) {
-                if (selectedIds.length === 2) {
-                   const c1 = cards.find(c => c.id === selectedIds[0])!;
-                   const c2 = cards.find(c => c.id === selectedIds[1])!;
-                   if (c1.wordId === c2.wordId) btnClass = "bg-green-500 border-green-500 text-white shadow-md scale-102";
-                   else btnClass = "bg-red-500 border-red-500 text-white shadow-md";
+            if (card.isMatched) {
+              buttonClassName = 'pointer-events-none border-emerald-200 bg-emerald-100/70 text-emerald-700 opacity-50';
+            } else if (isSelected) {
+              if (selectedIds.length === 2) {
+                const firstCard = cards.find((item) => item.id === selectedIds[0]);
+                const secondCard = cards.find((item) => item.id === selectedIds[1]);
+                if (firstCard && secondCard && firstCard.wordId === secondCard.wordId) {
+                  buttonClassName = 'border-emerald-300 bg-emerald-500 text-white shadow-[0_18px_40px_rgba(16,185,129,0.22)]';
                 } else {
-                   btnClass = "bg-blue-50 border-blue-200 text-blue-700";
+                  buttonClassName = 'border-rose-300 bg-rose-500 text-white shadow-[0_18px_40px_rgba(244,63,94,0.22)]';
                 }
-             }
+              } else {
+                  buttonClassName = 'border-sky-200 bg-sky-50 text-sky-700';
+              }
+            }
 
-             return (
-               <button key={card.id} onClick={() => handleCardClick(card)}
-                 className={`h-28 p-4 text-lg font-medium rounded-2xl transition-all text-center flex items-center justify-center border ${btnClass}`}>
-                  <span className="line-clamp-3">{card.text}</span>
-               </button>
-             );
+            return (
+              <button
+                key={card.id}
+                onClick={() => handleCardClick(card)}
+                className={`flex min-h-32 items-center justify-center rounded-[16px] border px-4 py-5 text-center text-lg font-semibold transition-all ${buttonClassName}`}
+              >
+                <span className="line-clamp-3">{card.text}</span>
+              </button>
+            );
           })}
         </div>
-      </div>
-    </div>
+      )}
+    </StudyModeShell>
   );
 }

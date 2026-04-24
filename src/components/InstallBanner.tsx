@@ -25,31 +25,31 @@ export default function InstallBanner({ onDismiss }: InstallBannerProps) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pt-4">
-      <div className="rounded-3xl border border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-5 shadow-[0_8px_30px_rgb(59,130,246,0.08)]">
+    <div className="mx-auto max-w-7xl px-4 pt-2 sm:px-6 lg:px-8">
+      <div className="panel-surface-strong rounded-[18px] p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">iPad Kurulum</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">Ana ekrana ekleyip uygulama gibi kullanabilirsin</h2>
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-sky-700">iPad kurulum</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-claude-text">Ana ekrana ekleyip gerçek bir uygulama gibi kullanabilirsin</h2>
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-claude-subtle">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-claude-border bg-claude-surface px-3 py-1.5">
                 <Share size={14} className="text-blue-500" />
-                Paylas
+                Paylaş
               </span>
-              <span className="text-gray-300">→</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5">
+              <span className="text-claude-muted">→</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-claude-border bg-claude-surface px-3 py-1.5">
                 <SquarePlus size={14} className="text-blue-500" />
-                Ana Ekrana Ekle
+                Ana ekrana ekle
               </span>
-              <span className="text-gray-300">→</span>
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5">
+              <span className="text-claude-muted">→</span>
+              <span className="inline-flex items-center rounded-full border border-claude-border bg-claude-surface px-3 py-1.5 font-semibold text-claude-text">
                 WortSchatz
               </span>
             </div>
           </div>
           <button
             onClick={onDismiss}
-            className="rounded-full border border-gray-200 bg-white p-2 text-gray-400 transition-colors hover:text-gray-700"
+            className="rounded-full border border-claude-border bg-claude-surface p-2 text-claude-muted transition-colors hover:text-claude-text"
             aria-label="Kurulum bannerini kapat"
           >
             <X size={16} />

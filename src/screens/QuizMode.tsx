@@ -1,108 +1,159 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '../AppContext';
 import { Screen } from '../App';
-import { ChevronLeft, ArrowDownUp } from 'lucide-react';
+import StudyModeShell from '../components/StudyModeShell';
+import StudyCompletionCard from '../components/StudyCompletionCard';
 
-export default function QuizMode({ listId, onNavigate }: { listId: string, onNavigate: (screen: Screen) => void }) {
+export default function QuizMode({ listId, onNavigate }: { listId: string; onNavigate: (screen: Screen) => void }) {
   const { lists, recordSuccess, recordFailure, studyDirection, toggleStudyDirection, getDifficultWordsList } = useApp();
-  const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find(l => l.id === listId);
+  const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find((item) => item.id === listId);
   const words = list?.words || [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   if (words.length < 4) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center h-full">
-         <p className="text-gray-500 font-medium mb-6">Test modu için listede en az 4 kelime bulunmalıdır.</p>
-         <button onClick={() => onNavigate({ type: 'dashboard' })} className="px-6 py-2.5 bg-blue-500 text-white rounded-full font-medium transition-colors hover:bg-blue-600">Geri Dön</button>
+      <div className="mx-auto flex min-h-full w-full max-w-xl items-center justify-center px-4 py-10">
+        <div className="panel-surface-strong rounded-[30px] p-8 text-center">
+          <div className="text-2xl font-semibold text-claude-text">Test modu için en az 4 kelime gerekli.</div>
+          <p className="mt-3 text-sm leading-7 text-claude-subtle">Bu listeyi biraz daha büyüttüğümüzde çeldiricili test deneyimi çok daha güçlü çalışır.</p>
+          <button onClick={() => onNavigate({ type: 'dashboard' })} className="button-primary mt-6">
+            Panele dön
+          </button>
+        </div>
       </div>
     );
   }
 
   const currentWord = words[currentIndex];
 
-  const getQuestionText = (w: any) => studyDirection === 'TR_TO_DE' ? (w.translationTr || w.translationEn || w.translation || '') : w.term;
-  const getAnswerText = (w: any) => studyDirection === 'TR_TO_DE' ? w.term : (w.translationTr || w.translationEn || w.translation || '');
+  const getQuestionText = (word: (typeof words)[number]) =>
+    studyDirection === 'TR_TO_DE' ? word.translationTr || word.translationEn || word.translation || '' : word.term;
+  const getAnswerText = (word: (typeof words)[number]) =>
+    studyDirection === 'TR_TO_DE' ? word.term : word.translationTr || word.translationEn || word.translation || '';
 
   const options = useMemo(() => {
     const wrongOptions = words
-      .filter(w => w.id !== currentWord.id)
+      .filter((word) => word.id !== currentWord.id)
       .sort(() => 0.5 - Math.random())
       .slice(0, 3)
-      .map(w => getAnswerText(w));
-    
+      .map((word) => getAnswerText(word));
+
     return [getAnswerText(currentWord), ...wrongOptions].sort(() => 0.5 - Math.random());
   }, [currentIndex, words, currentWord, studyDirection]);
 
-  const handleSelect = (option: string) => {
-    if (selectedAnswer) return;
-    setSelectedAnswer(option);
-    
-    const correctTranslation = getAnswerText(currentWord);
-    if (option === correctTranslation) recordSuccess(currentWord.id);
-    else recordFailure(currentWord.id);
+  const correctOption = getAnswerText(currentWord);
+  const progress = ((currentIndex + (isComplete ? 1 : 0)) / words.length) * 100;
 
-    setTimeout(() => {
+  const handleSelect = (option: string) => {
+    if (selectedAnswer) {
+      return;
+    }
+
+    setSelectedAnswer(option);
+
+    if (option === correctOption) {
+      recordSuccess(currentWord.id);
+      setCorrectCount((previous) => previous + 1);
+    } else {
+      recordFailure(currentWord.id);
+      setIncorrectCount((previous) => previous + 1);
+    }
+
+    window.setTimeout(() => {
       setSelectedAnswer(null);
-      if (currentIndex < words.length - 1) setCurrentIndex(prev => prev + 1);
-      else { alert("Test Tamamlandı!"); onNavigate({ type: 'dashboard' }); }
-    }, 1200);
+
+      if (currentIndex < words.length - 1) {
+        setCurrentIndex((previous) => previous + 1);
+      } else {
+        setIsComplete(true);
+      }
+    }, 950);
   };
 
-  const progress = ((currentIndex + (selectedAnswer ? 1 : 0)) / words.length) * 100;
-  const correctOption = getAnswerText(currentWord);
-
   return (
-    <div className="max-w-2xl mx-auto p-8 flex flex-col h-full w-full">
-      <div className="flex items-center justify-between mb-12">
-        <div className="flex items-center gap-3">
-          <button onClick={() => onNavigate({ type: 'dashboard' })} className="text-gray-400 hover:text-gray-700 transition-colors">
-            <ChevronLeft size={24} strokeWidth={1.5} />
-          </button>
-          <button
-            onClick={toggleStudyDirection}
-            className="flex items-center justify-center p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
-            title="Yönü Çevir"
-          >
-            <ArrowDownUp size={18} strokeWidth={2} />
-            <span className="text-[10px] uppercase font-bold tracking-widest ml-1.5 hidden sm:inline">
-              {studyDirection === 'TR_TO_DE' ? 'TR ➔ DE' : 'DE ➔ TR'}
-            </span>
-          </button>
-        </div>
-        <div className="w-1/3 h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
-          <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${progress}%` }} />
-        </div>
-        <div className="text-xs font-semibold text-gray-400 tracking-widest">{currentIndex + 1} / {words.length}</div>
-      </div>
+    <StudyModeShell
+      modeLabel="Test"
+      title="Hızlı karar ve doğru çağırma pratiği"
+      description="Çeldiriciler arasından doğru karşılığı seçerek kelimeyi gerçekten ayırt edip edemediğini ölçer."
+      listTitle={list?.title || 'Liste'}
+      progress={progress}
+      currentIndex={isComplete ? words.length - 1 : currentIndex}
+      total={words.length}
+      onBack={() => onNavigate({ type: 'dashboard' })}
+      directionLabel={studyDirection === 'TR_TO_DE' ? 'TR → DE' : 'DE → TR'}
+      onToggleDirection={toggleStudyDirection}
+      accentClassName="emerald"
+      progressNote="Her soruda dört seçenek geliyor; kısa bekleme sonrası sistem seni otomatik olarak sonraki soruya taşıyor."
+      stats={[
+        { label: 'Doğru', value: `${correctCount}` },
+        { label: 'Yanlış', value: `${incorrectCount}` },
+        { label: 'Kalan', value: `${Math.max(words.length - currentIndex - (isComplete ? 1 : 0), 0)}` },
+        { label: 'Liste', value: list?.title || '-' },
+      ]}
+    >
+      {isComplete ? (
+        <StudyCompletionCard
+          title="Test tamamlandı"
+          description="Çeldiricili tur bitti. İstersen aynı listeyi yeniden çözebilir ya da yazma moduna geçerek aktif üretimi deneyebilirsin."
+          primaryLabel="Tekrar çöz"
+          onPrimary={() => {
+            setCurrentIndex(0);
+            setSelectedAnswer(null);
+            setCorrectCount(0);
+            setIncorrectCount(0);
+            setIsComplete(false);
+          }}
+          secondaryLabel="Panele dön"
+          onSecondary={() => onNavigate({ type: 'dashboard' })}
+          summary={[
+            { label: 'Toplam soru', value: `${words.length}` },
+            { label: 'Doğru', value: `${correctCount}` },
+            { label: 'Yanlış', value: `${incorrectCount}` },
+          ]}
+        />
+      ) : (
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 py-2">
+          <div className="text-center">
+            <div className="section-label">{studyDirection === 'TR_TO_DE' ? 'Almanca karşılığı nedir?' : 'Türkçe karşılığı nedir?'}</div>
+            <h2 className="mt-5 text-3xl font-semibold leading-tight text-claude-text sm:text-5xl">
+              {studyDirection === 'DE_TO_TR' && currentWord.article ? <span className="mr-3 text-claude-muted">{currentWord.article}</span> : null}
+              {getQuestionText(currentWord)}
+            </h2>
+          </div>
 
-      <div className="flex-1 flex flex-col">
-        <div className="bg-transparent mb-12 min-h-[140px] flex flex-col items-center justify-center text-center">
-           <span className="text-gray-400 font-medium text-sm mb-4 border border-gray-200 px-3 py-1 rounded-full">{studyDirection === 'TR_TO_DE' ? 'Almanca karşılığı nedir?' : 'Türkçe karşılığı nedir?'}</span>
-           <h2 className="text-5xl font-semibold text-gray-900 tracking-tight">
-             {studyDirection === 'DE_TO_TR' && currentWord.article && <span className="text-gray-400 font-normal italic mr-3">{currentWord.article}</span>}
-             {getQuestionText(currentWord)}
-           </h2>
-        </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {options.map((option) => {
+              let buttonClassName = 'border-claude-border bg-claude-surface text-claude-text hover:border-claude-accent/50 hover:-translate-y-0.5';
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto mb-12">
-          {options.map((option, i) => {
-            let btnClass = "bg-white text-gray-800 border-gray-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-gray-300 hover:bg-gray-50";
-            if (selectedAnswer) {
-              if (option === correctOption) btnClass = "bg-green-500 text-white border-green-500 shadow-md";
-              else if (option === selectedAnswer) btnClass = "bg-red-500 text-white border-red-500 shadow-md";
-              else btnClass = "bg-white text-gray-300 border-gray-100 opacity-40 shadow-none";
-            }
-            return (
-              <button key={i} onClick={() => handleSelect(option)} disabled={selectedAnswer !== null}
-                className={`w-full p-6 text-lg font-medium rounded-2xl transition-all text-center border ${btnClass}`}>
-                {option}
-              </button>
-            );
-          })}
+              if (selectedAnswer) {
+                if (option === correctOption) {
+                  buttonClassName = 'border-emerald-300 bg-emerald-500 text-white shadow-[0_18px_40px_rgba(16,185,129,0.24)]';
+                } else if (option === selectedAnswer) {
+                  buttonClassName = 'border-rose-300 bg-rose-500 text-white shadow-[0_18px_40px_rgba(244,63,94,0.2)]';
+                } else {
+                  buttonClassName = 'border-claude-border bg-claude-surface text-claude-muted opacity-60';
+                }
+              }
+
+              return (
+                <button
+                  key={option}
+                  onClick={() => handleSelect(option)}
+                  disabled={selectedAnswer !== null}
+                  className={`rounded-[16px] border px-4 py-5 text-left text-lg font-semibold transition-all ${buttonClassName}`}
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </StudyModeShell>
   );
 }

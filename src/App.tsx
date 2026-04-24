@@ -1,4 +1,20 @@
 import { useEffect, useState } from 'react';
+import {
+  BookOpen,
+  ChevronDown,
+  Download,
+  Pencil,
+  Flame,
+  LayoutDashboard,
+  LibraryBig,
+  Moon,
+  PanelLeft,
+  Plus,
+  Search,
+  Settings,
+  Sun,
+  Upload,
+} from 'lucide-react';
 import { useApp } from './AppContext';
 import Dashboard from './screens/Dashboard';
 import ListEditor from './screens/ListEditor';
@@ -7,20 +23,44 @@ import QuizMode from './screens/QuizMode';
 import WriteMode from './screens/WriteMode';
 import MatchMode from './screens/MatchMode';
 import GrammarHub from './screens/GrammarHub';
-import { LibraryBig, Settings } from 'lucide-react';
 import InstallBanner from './components/InstallBanner';
 import SettingsModal from './components/SettingsModal';
-import ConnectivityBadge from './components/ConnectivityBadge';
+import { useTheme } from './theme';
+import { GRAMMAR_SECTIONS, GRAMMAR_TOPICS, getGrammarTopicsBySection } from './grammarData';
+import { GrammarLevel, GrammarSection, GrammarTopic } from './types';
 
-export type Screen = 
+export type Screen =
   | { type: 'dashboard' }
   | { type: 'grammar' }
-  | { type: 'edit_list', listId: string }
-  | { type: 'study', mode: 'flashcard' | 'quiz' | 'write' | 'match', listId: string };
+  | { type: 'edit_list'; listId: string }
+  | { type: 'study'; mode: 'flashcard' | 'quiz' | 'write' | 'match'; listId: string };
+
+type GrammarSectionFilter = GrammarSection['id'] | 'ALL';
+type GrammarLevelFilter = GrammarLevel | 'ALL';
+
+function matchesGrammarTopicSearch(topic: GrammarTopic, query: string): boolean {
+  if (!query.trim()) return true;
+
+  const normalizedQuery = query.toLocaleLowerCase('tr-TR');
+  const haystack = [topic.chapter.toString(), topic.title, topic.titleTr, topic.summary, ...topic.highlights, ...topic.pitfalls]
+    .join(' ')
+    .toLocaleLowerCase('tr-TR');
+
+  return haystack.includes(normalizedQuery);
+}
+
+function getGrammarTopicOptions(sectionFilter: GrammarSectionFilter, levelFilter: GrammarLevelFilter, query: string) {
+  const topics = sectionFilter === 'ALL' ? GRAMMAR_TOPICS : getGrammarTopicsBySection(sectionFilter);
+  return topics.filter((topic) => {
+    const levelMatches = levelFilter === 'ALL' ? true : topic.levels.includes(levelFilter);
+    return levelMatches && matchesGrammarTopicSearch(topic, query);
+  });
+}
 
 export default function App() {
   const {
     isHydrated,
+    lists,
     aiModel,
     browserApiKey,
     clearBrowserApiKey,
@@ -31,11 +71,30 @@ export default function App() {
     setBrowserApiKey,
     setAiModel,
     showInstallHint,
+    getDifficultWordsList,
   } = useApp();
   const [currentScreen, setCurrentScreen] = useState<Screen>({ type: 'dashboard' });
+  const [selectedListId, setSelectedListId] = useState('');
+  const [grammarSectionFilter, setGrammarSectionFilter] = useState<GrammarSectionFilter>('ALL');
+  const [grammarLevelFilter, setGrammarLevelFilter] = useState<GrammarLevelFilter>('ALL');
+  const [grammarQuery, setGrammarQuery] = useState('');
+  const [selectedGrammarTopicId, setSelectedGrammarTopicId] = useState(GRAMMAR_TOPICS[0]?.id ?? '');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
-  const navigate = (screen: Screen) => setCurrentScreen(screen);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  const navigate = (screen: Screen) => {
+    setCurrentScreen(screen);
+  };
+  const isStudyScreen = currentScreen.type === 'study';
+  const difficultList = getDifficultWordsList();
+  const grammarTopicOptions = getGrammarTopicOptions(grammarSectionFilter, grammarLevelFilter, grammarQuery);
+
+  const selectList = (listId: string) => {
+    setSelectedListId(listId);
+    navigate({ type: 'dashboard' });
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -48,6 +107,39 @@ export default function App() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+
+  useEffect(() => {
+    if (!grammarTopicOptions.length) return;
+
+    const hasSelectedTopic = grammarTopicOptions.some((topic) => topic.id === selectedGrammarTopicId);
+    if (!hasSelectedTopic) {
+      setSelectedGrammarTopicId(grammarTopicOptions[0].id);
+    }
+  }, [grammarTopicOptions, selectedGrammarTopicId]);
+
+  useEffect(() => {
+    if (!lists.length) {
+      setSelectedListId((current) => current || '');
+      return;
+    }
+
+    setSelectedListId((current) => (current && lists.some((list) => list.id === current) ? current : lists[0].id));
+  }, [lists]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(max-width: 1199px)');
+    const closeIfNarrow = () => {
+      if (mediaQuery.matches) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    closeIfNarrow();
+    mediaQuery.addEventListener('change', closeIfNarrow);
+    return () => mediaQuery.removeEventListener('change', closeIfNarrow);
   }, []);
 
   const handleExportBackup = () => {
@@ -64,61 +156,293 @@ export default function App() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleImportClick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        importBackup(text);
+      } catch (error) {
+        console.error('Yedek içe aktarılamadı', error);
+      }
+    };
+    input.click();
+  };
+
   if (!isHydrated) {
     return (
-      <div className="w-full h-screen bg-[#f5f5f7] flex items-center justify-center font-sans text-[#1d1d1f]">
-        <div className="bg-white rounded-3xl px-8 py-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200/60">
-          Veriler hazirlaniyor...
+      <div className="app-shell flex h-screen w-full items-center justify-center px-4 text-claude-text">
+        <div className="card relative z-10 rounded-2xl px-8 py-6 text-center">
+          <div className="section-label mb-4">WortSchatz</div>
+          <div className="font-display text-2xl text-claude-text">Veriler hazırlanıyor...</div>
+          <div className="mt-2 text-sm text-claude-muted">Yerel içerik ve öğrenme geçmişi geri yükleniyor.</div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="w-full h-screen bg-[#f5f5f7] flex flex-col font-sans text-[#1d1d1f] overflow-hidden selection:bg-blue-200 selection:text-blue-900">
-      <nav className="h-14 bg-white/70 backdrop-blur-md border-b border-black/5 flex items-center justify-between px-6 shrink-0 relative z-10 w-full transition-all">
-        <div 
-          className="flex items-center gap-2 cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
-          onClick={() => navigate({ type: 'dashboard' })}
-        >
-          <div className="w-8 h-8 rounded-[10px] flex items-center justify-center text-blue-600 font-semibold text-lg border border-black/5 shadow-sm bg-gradient-to-b from-white to-gray-50">
-            W
-          </div>
-          <span className="text-xl font-medium tracking-tight text-[#1d1d1f]">WortSchatz</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate({ type: 'grammar' })}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
-              currentScreen.type === 'grammar'
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                : 'border-black/5 bg-white text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <LibraryBig size={16} />
-            Gramer
-          </button>
-          <ConnectivityBadge isOnline={isOnline} />
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-2 rounded-full border border-black/5 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:text-gray-900"
-          >
-            <Settings size={16} />
-            Ayarlar
-          </button>
-        </div>
-      </nav>
+  const isActive = (predicate: boolean) => (predicate ? 'nav-item active' : 'nav-item');
 
-      <div className="flex-1 overflow-auto relative">
-        {!installHintDismissed && <InstallBanner onDismiss={dismissInstallHint} />}
-        {currentScreen.type === 'dashboard' && <Dashboard onNavigate={navigate} />}
-        {currentScreen.type === 'grammar' && <GrammarHub onNavigate={navigate} />}
-        {currentScreen.type === 'edit_list' && <ListEditor listId={currentScreen.listId} onNavigate={navigate} />}
-        {currentScreen.type === 'study' && currentScreen.mode === 'flashcard' && <FlashcardMode listId={currentScreen.listId} onNavigate={navigate} />}
-        {currentScreen.type === 'study' && currentScreen.mode === 'quiz' && <QuizMode listId={currentScreen.listId} onNavigate={navigate} />}
-        {currentScreen.type === 'study' && currentScreen.mode === 'write' && <WriteMode listId={currentScreen.listId} onNavigate={navigate} />}
-        {currentScreen.type === 'study' && currentScreen.mode === 'match' && <MatchMode listId={currentScreen.listId} onNavigate={navigate} />}
-      </div>
+  return (
+    <div className="app-shell relative flex h-screen w-screen overflow-hidden text-claude-text">
+      {!isStudyScreen && isSidebarOpen ? (
+        <aside
+          aria-label="Birincil navigasyon"
+          className="sidebar-surface fixed inset-y-0 left-0 z-40 flex w-[min(20rem,calc(100vw-2rem))] translate-x-0 flex-col shadow-pop transition-transform duration-200 xl:relative xl:z-[2] xl:w-64 xl:flex-shrink-0 xl:shadow-none"
+        >
+          <div className="flex h-14 items-center justify-between px-4">
+            <button
+              onClick={() => navigate({ type: 'dashboard' })}
+              className="flex items-center gap-2"
+              aria-label="Ana panele dön"
+            >
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-claude-accent text-sm font-bold text-white shadow-soft">
+                W
+              </div>
+              <span className="text-[15px] font-semibold text-claude-text">WortSchatz</span>
+            </button>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="sidebar-toggle-btn"
+              title="Sidebar'ı gizle"
+              aria-label="Sidebar'ı gizle"
+            >
+              <PanelLeft size={16} />
+            </button>
+          </div>
+
+          <div className="p-3">
+            <button
+              onClick={() => navigate({ type: 'edit_list', listId: 'new' })}
+              className="flex w-full items-center gap-2 rounded-lg border border-claude-border bg-claude-panel px-3 py-2 text-[13px] font-medium text-claude-text transition-all hover:border-claude-accent/40 hover:shadow-soft"
+            >
+              <Plus size={16} className="text-claude-accent" />
+              <span>Yeni liste</span>
+            </button>
+          </div>
+
+          <nav className="custom-scroll flex-1 overflow-y-auto px-3 pb-3" aria-label="Ana navigasyon">
+            <div className="mb-2 space-y-0.5">
+              <button
+                onClick={() => navigate({ type: 'dashboard' })}
+                className={isActive(currentScreen.type === 'dashboard')}
+                aria-current={currentScreen.type === 'dashboard' ? 'page' : undefined}
+              >
+                <LayoutDashboard className="nav-icon" />
+                <span>Panel</span>
+              </button>
+              <button
+                onClick={() => navigate({ type: 'grammar' })}
+                className={isActive(currentScreen.type === 'grammar')}
+                aria-current={currentScreen.type === 'grammar' ? 'page' : undefined}
+              >
+                <LibraryBig className="nav-icon" />
+                <span>Gramer Atlası</span>
+              </button>
+              {difficultList && difficultList.words.length > 0 ? (
+                <button
+                  onClick={() => selectList('difficult-words')}
+                  className={isActive(
+                    selectedListId === 'difficult-words' ||
+                      (currentScreen.type === 'study' && currentScreen.listId === 'difficult-words'),
+                  )}
+                >
+                  <div className="flex flex-1 items-center gap-3">
+                    <Flame className="nav-icon" />
+                    <span>Zor Kelimeler</span>
+                  </div>
+                  <span className="badge bg-claude-accentSoft text-claude-accent">{difficultList.words.length}</span>
+                </button>
+              ) : null}
+            </div>
+
+            {currentScreen.type === 'grammar' ? (
+              <div className="mb-1 mt-2">
+                <div className="nav-section-title">Gramer Konuları</div>
+                <div className="px-1 pb-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-claude-muted" size={14} />
+                    <input
+                      type="search"
+                      value={grammarQuery}
+                      onChange={(event) => setGrammarQuery(event.target.value)}
+                      placeholder="passiv, dativ..."
+                      className="h-9 w-full rounded-[9px] border border-claude-border bg-claude-panel py-2 pl-8 pr-2 text-xs text-claude-text outline-none placeholder:text-claude-muted focus:border-claude-accent"
+                    />
+                  </div>
+                  <select
+                    value={grammarSectionFilter}
+                    onChange={(event) => setGrammarSectionFilter(event.target.value as GrammarSectionFilter)}
+                    className="mt-2 h-9 w-full rounded-[9px] border border-claude-border bg-claude-panel px-2 text-xs font-medium text-claude-text outline-none focus:border-claude-accent"
+                  >
+                    <option value="ALL">All</option>
+                    {GRAMMAR_SECTIONS.map((section) => (
+                      <option key={section.id} value={section.id}>
+                        {section.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-0.5">
+                  {grammarTopicOptions.length === 0 ? (
+                    <div className="px-2.5 py-4 text-[12px] text-claude-muted">Konu bulunamadı.</div>
+                  ) : (
+                    grammarTopicOptions.map((topic) => {
+                      const active = topic.id === selectedGrammarTopicId;
+                      return (
+                        <button
+                          key={topic.id}
+                          onClick={() => setSelectedGrammarTopicId(topic.id)}
+                          className={`nav-topic-item ${active ? 'active' : ''}`}
+                          title={`Kapitel ${topic.chapter} · ${topic.title}`}
+                        >
+                          <span className="nav-topic-chapter">K.{topic.chapter}</span>
+                          <span className="nav-topic-title">{topic.title}</span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="mb-1 mt-2">
+                  <div className="nav-section-title">Çalışma Listeleri</div>
+                  {lists.length === 0 ? (
+                    <div className="px-2.5 py-1.5 text-[12px] text-claude-muted">Henüz liste yok.</div>
+                  ) : (
+                    lists.map((list) => {
+                      const active =
+                        selectedListId === list.id ||
+                        (currentScreen.type === 'edit_list' && currentScreen.listId === list.id) ||
+                        (currentScreen.type === 'study' && currentScreen.listId === list.id);
+                      return (
+                        <div key={list.id} className={`nav-list-row ${active ? 'active' : ''}`}>
+                          <button
+                            onClick={() => selectList(list.id)}
+                            className="nav-list-main"
+                            title={`${list.title} listesini seç`}
+                          >
+                            <BookOpen className="nav-icon" />
+                            <span className="flex-1 truncate">{list.title}</span>
+                            <span className="text-[11px] text-claude-muted">{list.words.length}</span>
+                          </button>
+                          <button
+                            onClick={() => navigate({ type: 'edit_list', listId: list.id })}
+                            className="nav-list-edit"
+                            title="Listeyi düzenle"
+                            aria-label={`${list.title} listesini düzenle`}
+                          >
+                            <Pencil size={13} />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                <div className="mb-1 mt-2">
+                  <div className="nav-section-title">Yedekleme</div>
+                  <button onClick={handleExportBackup} className="nav-item">
+                    <Download className="nav-icon" />
+                    <span>Yedek indir</span>
+                  </button>
+                  <button onClick={handleImportClick} className="nav-item">
+                    <Upload className="nav-icon" />
+                    <span>Yedekten yükle</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </nav>
+
+          <div className="border-t border-claude-border p-3">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-claude-border/40"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-claude-accent to-claude-accentHover text-[13px] font-semibold text-white">
+                O
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13px] font-medium text-claude-text">0xozen</div>
+                <div className="truncate text-[11px] text-claude-muted">Öğrenci · Almanca A1–B1</div>
+              </div>
+              <ChevronDown size={14} className="text-claude-muted" />
+            </button>
+          </div>
+        </aside>
+      ) : null}
+
+      <main className="main-surface relative z-[1] flex min-w-0 flex-1 flex-col">
+        {!isStudyScreen && (
+          <header className="topbar-surface sticky top-0 z-10 flex h-14 items-center justify-between px-4">
+            <div className="flex items-center gap-3">
+              {!isSidebarOpen ? (
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="sidebar-toggle-btn"
+                  title="Sidebar'ı göster"
+                  aria-label="Sidebar'ı göster"
+                >
+                  <PanelLeft size={16} />
+                </button>
+              ) : null}
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleTheme}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-claude-muted transition-colors hover:bg-claude-border/60"
+                title={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+                aria-label={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-claude-muted transition-colors hover:bg-claude-border/60"
+                title="Ayarlar"
+                aria-label="Ayarlar"
+              >
+                <Settings size={16} />
+              </button>
+            </div>
+          </header>
+        )}
+
+        <div className="relative z-[1] flex-1 overflow-auto">
+          {!installHintDismissed && !isStudyScreen ? <InstallBanner onDismiss={dismissInstallHint} /> : null}
+          {currentScreen.type === 'dashboard' && (
+            <Dashboard selectedListId={selectedListId} onSelectList={setSelectedListId} onNavigate={navigate} />
+          )}
+          {currentScreen.type === 'grammar' && (
+            <GrammarHub
+              selectedSectionFilter={grammarSectionFilter}
+              selectedLevel={grammarLevelFilter}
+              query={grammarQuery}
+              selectedTopicId={selectedGrammarTopicId}
+            />
+          )}
+          {currentScreen.type === 'edit_list' && <ListEditor listId={currentScreen.listId} onNavigate={navigate} />}
+          {currentScreen.type === 'study' && currentScreen.mode === 'flashcard' && (
+            <FlashcardMode listId={currentScreen.listId} onNavigate={navigate} />
+          )}
+          {currentScreen.type === 'study' && currentScreen.mode === 'quiz' && (
+            <QuizMode listId={currentScreen.listId} onNavigate={navigate} />
+          )}
+          {currentScreen.type === 'study' && currentScreen.mode === 'write' && (
+            <WriteMode listId={currentScreen.listId} onNavigate={navigate} />
+          )}
+          {currentScreen.type === 'study' && currentScreen.mode === 'match' && (
+            <MatchMode listId={currentScreen.listId} onNavigate={navigate} />
+          )}
+        </div>
+      </main>
 
       <SettingsModal
         isOpen={isSettingsOpen}

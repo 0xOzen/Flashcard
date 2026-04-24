@@ -1,125 +1,184 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useApp } from '../AppContext';
 import { Screen } from '../App';
-import { ChevronLeft, CornerDownLeft, ArrowDownUp } from 'lucide-react';
+import { CornerDownLeft } from 'lucide-react';
+import StudyModeShell from '../components/StudyModeShell';
+import StudyCompletionCard from '../components/StudyCompletionCard';
 
-export default function WriteMode({ listId, onNavigate }: { listId: string, onNavigate: (screen: Screen) => void }) {
+export default function WriteMode({ listId, onNavigate }: { listId: string; onNavigate: (screen: Screen) => void }) {
   const { lists, recordSuccess, recordFailure, studyDirection, toggleStudyDirection, getDifficultWordsList } = useApp();
-  const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find(l => l.id === listId);
+  const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find((item) => item.id === listId);
   const words = list?.words || [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputVal, setInputVal] = useState('');
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'incorrect'>('idle');
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (feedback === 'idle' && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [feedback, currentIndex]);
 
   if (words.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center h-full">
-         <button onClick={() => onNavigate({ type: 'dashboard' })} className="px-6 py-2.5 bg-blue-500 text-white rounded-full font-medium transition-colors hover:bg-blue-600">Geri Dön</button>
+      <div className="mx-auto flex min-h-full w-full max-w-xl items-center justify-center px-4 py-10">
+        <div className="panel-surface-strong rounded-[30px] p-8 text-center">
+          <div className="text-2xl font-semibold text-claude-text">Yazma için hazır kelime yok.</div>
+          <p className="mt-3 text-sm leading-7 text-claude-subtle">Listeye kelime eklediğinde bu alan otomatik olarak aktif hale gelecek.</p>
+          <button onClick={() => onNavigate({ type: 'dashboard' })} className="button-primary mt-6">
+            Panele dön
+          </button>
+        </div>
       </div>
     );
   }
 
   const currentWord = words[currentIndex];
-  useEffect(() => { if (feedback === 'idle' && inputRef.current) inputRef.current.focus(); }, [feedback, currentIndex]);
+  const getQuestionText = (word: (typeof words)[number]) =>
+    studyDirection === 'TR_TO_DE' ? word.term : word.translationTr || word.translationEn || word.translation || '';
+  const getAnswerText = (word: (typeof words)[number]) =>
+    studyDirection === 'TR_TO_DE' ? word.translationTr || word.translationEn || word.translation || '' : word.term;
 
-  // If DE_TO_TR (normal): prompt is TR, typed answer is DE.
-  // If TR_TO_DE: prompt is DE, typed answer is TR.
-  // Wait, the prompt for write mode historically was TR. Let's make it follow the pattern:
-  // getQuestionText = what appears on screen. getAnswerText = what you type.
-  const getQuestionText = (w: any) => studyDirection === 'TR_TO_DE' ? w.term : (w.translationTr || w.translationEn || w.translation || '');
-  const getAnswerText = (w: any) => studyDirection === 'TR_TO_DE' ? (w.translationTr || w.translationEn || w.translation || '') : w.term;
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    if (!inputVal.trim() || feedback !== 'idle') {
+      return;
+    }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputVal.trim() || feedback !== 'idle') return;
+    const answer = getAnswerText(currentWord).toLowerCase().trim();
+    const input = inputVal.toLowerCase().trim();
 
-    const answerStr = getAnswerText(currentWord);
-    const cleanAnswer = answerStr.toLowerCase().trim();
-    const cleanInput = inputVal.toLowerCase().trim();
-    
-    // Allow article inclusion if it's German target
-    let withArticle = cleanAnswer;
+    let answerWithArticle = answer;
     if (studyDirection === 'DE_TO_TR' && currentWord.article) {
-       withArticle = `${currentWord.article.toLowerCase()} ${cleanAnswer}`.trim();
+      answerWithArticle = `${currentWord.article.toLowerCase()} ${answer}`.trim();
     }
 
-    if (cleanInput === cleanAnswer || cleanInput === withArticle) {
-      setFeedback('correct'); recordSuccess(currentWord.id);
+    const isCorrect = input === answer || input === answerWithArticle;
+
+    if (isCorrect) {
+      setFeedback('correct');
+      setCorrectCount((previous) => previous + 1);
+      recordSuccess(currentWord.id);
     } else {
-      setFeedback('incorrect'); recordFailure(currentWord.id);
+      setFeedback('incorrect');
+      setIncorrectCount((previous) => previous + 1);
+      recordFailure(currentWord.id);
     }
-    setTimeout(() => {
-      setFeedback('idle'); setInputVal('');
-      if (currentIndex < words.length - 1) setCurrentIndex(prev => prev + 1);
-      else { alert("Yazma Modu Tamamlandı!"); onNavigate({ type: 'dashboard' }); }
-    }, 1500);
+
+    window.setTimeout(() => {
+      setFeedback('idle');
+      setInputVal('');
+
+      if (currentIndex < words.length - 1) {
+        setCurrentIndex((previous) => previous + 1);
+      } else {
+        setIsComplete(true);
+      }
+    }, 1100);
   };
 
-  const progress = ((currentIndex + (feedback !== 'idle' ? 1 : 0)) / words.length) * 100;
-  const currentTranslation = currentWord.translationTr || currentWord.translationEn || currentWord.translation || '';
+  const progress = ((currentIndex + (isComplete ? 1 : 0)) / words.length) * 100;
+  const answerPreview = studyDirection === 'DE_TO_TR' ? `${currentWord.article ? `${currentWord.article} ` : ''}${currentWord.term}` : getAnswerText(currentWord);
 
   return (
-    <div className="max-w-2xl mx-auto p-8 flex flex-col h-full w-full">
-      <div className="flex items-center justify-between mb-12">
-        <div className="flex items-center gap-3">
-          <button onClick={() => onNavigate({ type: 'dashboard' })} className="text-gray-400 hover:text-gray-700 transition-colors">
-            <ChevronLeft size={24} strokeWidth={1.5} />
-          </button>
-          <button
-            onClick={toggleStudyDirection}
-            className="flex items-center justify-center p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
-            title="Yönü Çevir"
-          >
-            <ArrowDownUp size={18} strokeWidth={2} />
-            <span className="text-[10px] uppercase font-bold tracking-widest ml-1.5 hidden sm:inline">
-              {studyDirection === 'TR_TO_DE' ? 'TR ➔ DE (Almanca Gör)' : 'DE ➔ TR (Türkçe Gör)'}
-            </span>
-          </button>
+    <StudyModeShell
+      modeLabel="Yazma"
+      title="Pasif tanımayı aktif üretime çevir"
+      description="Kelimenin karşılığını kendi başına yazarak gerçekten bellekte oturup oturmadığını test eder."
+      listTitle={list?.title || 'Liste'}
+      progress={progress}
+      currentIndex={isComplete ? words.length - 1 : currentIndex}
+      total={words.length}
+      onBack={() => onNavigate({ type: 'dashboard' })}
+      directionLabel={studyDirection === 'TR_TO_DE' ? 'TR → DE' : 'DE → TR'}
+      onToggleDirection={toggleStudyDirection}
+      accentClassName="amber"
+      progressNote="Cevabı gönderdiğinde doğru ya da yanlış geri bildirimi anında görünür; ardından sıradaki kelimeye geçilir."
+      stats={[
+        { label: 'Doğru', value: `${correctCount}` },
+        { label: 'Yanlış', value: `${incorrectCount}` },
+        { label: 'Kalan', value: `${Math.max(words.length - currentIndex - (isComplete ? 1 : 0), 0)}` },
+        { label: 'Liste', value: list?.title || '-' },
+      ]}
+      footer={
+        <div className="text-sm leading-7 text-claude-subtle">
+          Yazım sırasında küçük harf kontrolü yapıyoruz. Almanca hedefte artikel ile birlikte yazman da doğru kabul edilir.
         </div>
-        <div className="w-1/3 h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
-          <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+      }
+    >
+      {isComplete ? (
+        <StudyCompletionCard
+          title="Yazma turu tamamlandı"
+          description="Bu tur artık daha üretken geçti. Aynı listeyi yeniden deneyebilir ya da test moduna geçip hızını ölçebilirsin."
+          primaryLabel="Tekrar yaz"
+          onPrimary={() => {
+            setCurrentIndex(0);
+            setInputVal('');
+            setFeedback('idle');
+            setCorrectCount(0);
+            setIncorrectCount(0);
+            setIsComplete(false);
+          }}
+          secondaryLabel="Panele dön"
+          onSecondary={() => onNavigate({ type: 'dashboard' })}
+          summary={[
+            { label: 'Toplam soru', value: `${words.length}` },
+            { label: 'Doğru', value: `${correctCount}` },
+            { label: 'Yanlış', value: `${incorrectCount}` },
+          ]}
+        />
+      ) : (
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 py-2">
+          <div className="text-center">
+            <div className="section-label">Karşılığını yaz</div>
+            <h2 className="mt-5 text-3xl font-semibold leading-tight text-claude-text sm:text-5xl">
+              {studyDirection === 'DE_TO_TR' && currentWord.article ? <span className="mr-3 text-claude-muted">{currentWord.article}</span> : null}
+              {getQuestionText(currentWord)}
+            </h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className="w-full">
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputVal}
+                onChange={(event) => setInputVal(event.target.value)}
+                disabled={feedback !== 'idle'}
+                autoComplete="off"
+                placeholder="Cevabı yaz..."
+                className={`w-full rounded-[16px] border px-6 py-5 text-center text-2xl font-semibold outline-none transition-all ${
+                  feedback === 'idle'
+                    ? 'border-claude-border bg-claude-surface text-claude-text shadow-soft focus:border-claude-warning focus:ring-4 focus:ring-claude-warning/10'
+                    : feedback === 'correct'
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                      : 'border-rose-300 bg-rose-50 text-rose-700'
+                }`}
+              />
+
+              {feedback === 'idle' ? (
+                <button type="submit" className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-[12px] border border-claude-border bg-claude-panel text-claude-muted transition-colors hover:text-claude-text">
+                  <CornerDownLeft size={18} />
+                </button>
+              ) : null}
+            </div>
+
+            <div className="mt-5 min-h-10 text-center">
+              {feedback === 'correct' ? <div className="text-sm font-semibold text-emerald-700">Harika, cevap doğru.</div> : null}
+              {feedback === 'incorrect' ? (
+                <div className="text-sm font-semibold text-rose-600">
+                  Doğrusu: <span className="text-claude-text">{answerPreview}</span>
+                </div>
+              ) : null}
+            </div>
+          </form>
         </div>
-        <div className="text-xs font-semibold text-gray-400 tracking-widest">{currentIndex + 1} / {words.length}</div>
-      </div>
-
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="mb-12 text-center">
-           <span className="text-gray-400 font-medium text-sm mb-4 border border-gray-200 px-3 py-1 rounded-full block mx-auto w-fit">Karşılığını yazın</span>
-           <h2 className="text-4xl font-semibold text-gray-900 tracking-tight">
-             {studyDirection === 'DE_TO_TR' && currentWord.article && <span className="text-gray-400 font-normal italic mr-3">{currentWord.article}</span>}
-             {getQuestionText(currentWord)}
-           </h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="relative w-full max-w-md">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            disabled={feedback !== 'idle'}
-            autoComplete="off"
-            placeholder="Terim..."
-            className={`w-full bg-white border border-gray-200 rounded-2xl px-6 py-5 text-2xl font-medium text-center shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus:outline-none ${
-               feedback === 'idle' ? 'focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900' :
-               feedback === 'correct' ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700'
-            }`}
-          />
-          {feedback === 'idle' && (
-             <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center text-gray-500 transition-all">
-               <CornerDownLeft size={18} />
-             </button>
-          )}
-
-          {feedback === 'incorrect' && (
-             <div className="absolute top-full mt-6 left-0 w-full text-center text-lg font-medium text-red-500 opacity-90 block">
-                Doğrusu: <span className="font-semibold text-gray-900">{studyDirection === 'DE_TO_TR' ? (currentWord.article ? currentWord.article + ' ' : '') + currentWord.term : getAnswerText(currentWord)}</span>
-             </div>
-          )}
-        </form>
-      </div>
-    </div>
+      )}
+    </StudyModeShell>
   );
 }
