@@ -114,3 +114,9 @@ Not: iPadOS'ta klasik otomatik install prompt'u her zaman cikmaz; en guvenli akÄ
 - Cloudflare Pages limits: https://developers.cloudflare.com/pages/platform/limits/
 - Cloudflare Pages pricing for Functions: https://developers.cloudflare.com/pages/functions/pricing/
 - Cloudflare Pages framework guides: https://developers.cloudflare.com/pages/framework-guides/
+
+## Project Spine v1 Location
+
+Canonical project path: `/Users/0xozen/Projects/apps/subprojects/flashcard-e`
+
+This app is managed as a recursive Project Spine v1 subproject under `/Users/0xozen/Projects/apps/subprojects/`. Active operational work belongs in `ops/TODO.md`; evidence belongs in `evidence/agent-runs/`.

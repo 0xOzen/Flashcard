@@ -1216,7 +1216,7 @@ export const GRAMMAR_TOPICS: GrammarTopic[] = [
       'während eşzamanlılık ya da karşıt bağlam verebilir.',
     ],
     examples: [
-      { de: 'Nachdem Arlette das Zertifikat bekommen hatte, machte sie den B2-Kurs.', tr: 'Arlette sertifikayı aldıktan sonra B2 kursunu yaptı.' },
+      { de: 'Nachdem Arlette das Zertifikat bekommen hatte, machte sie den Aufbaukurs.', tr: 'Arlette sertifikayı aldıktan sonra ileri kursa başladı.' },
     ],
     pitfalls: [
       'als ile wenn karışıklığı zaman çizgisini bozar.',

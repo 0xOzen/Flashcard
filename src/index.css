@@ -5,25 +5,25 @@
    Exposes bg-claude-*, text-claude-*, border-claude-* utilities
    ======================================================== */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Codex light palette */
-  --color-claude-bg: #FFFFFF;
+  --color-claude-bg: #F6F8F7;
   --color-claude-surface: #FFFFFF;
   --color-claude-panel: #FFFFFF;
-  --color-claude-border: rgba(26, 28, 31, 0.12);
-  --color-claude-text: #1A1C1F;
-  --color-claude-subtle: #4D535A;
-  --color-claude-muted: #7B828A;
-  --color-claude-accent: #339CFF;
-  --color-claude-accentHover: #147FE5;
-  --color-claude-accentSoft: rgba(51, 156, 255, 0.14);
-  --color-claude-success: #00A240;
-  --color-claude-warning: #D99400;
-  --color-claude-danger: #BA2623;
-  --color-claude-info: #339CFF;
-  --color-claude-skill: #924FF7;
+  --color-claude-border: rgba(29, 42, 35, 0.12);
+  --color-claude-text: #1C2420;
+  --color-claude-subtle: #526059;
+  --color-claude-muted: #7C8982;
+  --color-claude-accent: #3C8FDD;
+  --color-claude-accentHover: #2077C7;
+  --color-claude-accentSoft: rgba(60, 143, 221, 0.14);
+  --color-claude-success: #2EA86F;
+  --color-claude-warning: #C78C2B;
+  --color-claude-danger: #D75858;
+  --color-claude-info: #3C8FDD;
+  --color-claude-skill: #8B6FE8;
 
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.04);
   --shadow-pop: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -34,43 +34,43 @@
    Light theme is the default; dark theme flips them via [data-theme="dark"]
    ======================================================== */
 :root {
-  --color-claude-bg: #FFFFFF;
+  --color-claude-bg: #F6F8F7;
   --color-claude-surface: #FFFFFF;
   --color-claude-panel: #FFFFFF;
-  --color-claude-border: rgba(26, 28, 31, 0.12);
-  --color-claude-text: #1A1C1F;
-  --color-claude-subtle: #4D535A;
-  --color-claude-muted: #7B828A;
-  --color-claude-accent: #339CFF;
-  --color-claude-accentHover: #147FE5;
-  --color-claude-accentSoft: rgba(51, 156, 255, 0.14);
-  --color-claude-success: #00A240;
-  --color-claude-warning: #D99400;
-  --color-claude-danger: #BA2623;
-  --color-claude-info: #339CFF;
-  --color-claude-skill: #924FF7;
+  --color-claude-border: rgba(29, 42, 35, 0.12);
+  --color-claude-text: #1C2420;
+  --color-claude-subtle: #526059;
+  --color-claude-muted: #7C8982;
+  --color-claude-accent: #3C8FDD;
+  --color-claude-accentHover: #2077C7;
+  --color-claude-accentSoft: rgba(60, 143, 221, 0.14);
+  --color-claude-success: #2EA86F;
+  --color-claude-warning: #C78C2B;
+  --color-claude-danger: #D75858;
+  --color-claude-info: #3C8FDD;
+  --color-claude-skill: #8B6FE8;
 
-  --app-bg: #FFFFFF;
+  --app-bg: #F6F8F7;
   --app-surface: #FFFFFF;
   --app-panel: #FFFFFF;
   --app-panel-strong: #FFFFFF;
-  --app-window: rgba(255, 255, 255, 0.8);
-  --app-panel-translucent: rgba(255, 255, 255, 0.82);
-  --app-ink: #1A1C1F;
-  --app-subtle: #4D535A;
-  --app-muted: #7B828A;
-  --app-border: rgba(26, 28, 31, 0.12);
-  --app-line: rgba(26, 28, 31, 0.1);
-  --app-line-strong: rgba(26, 28, 31, 0.18);
-  --app-accent: #339CFF;
-  --app-accent-safe: #339CFF;
-  --app-accent-hover: #147FE5;
-  --app-accent-soft: rgba(51, 156, 255, 0.14);
-  --app-success: #00A240;
-  --app-warning: #D99400;
-  --app-danger: #BA2623;
-  --app-info: #339CFF;
-  --app-skill: #924FF7;
+  --app-window: rgba(255, 255, 255, 0.82);
+  --app-panel-translucent: rgba(255, 255, 255, 0.86);
+  --app-ink: #1C2420;
+  --app-subtle: #526059;
+  --app-muted: #7C8982;
+  --app-border: rgba(29, 42, 35, 0.12);
+  --app-line: rgba(29, 42, 35, 0.1);
+  --app-line-strong: rgba(29, 42, 35, 0.18);
+  --app-accent: #3C8FDD;
+  --app-accent-safe: #3C8FDD;
+  --app-accent-hover: #2077C7;
+  --app-accent-soft: rgba(60, 143, 221, 0.14);
+  --app-success: #2EA86F;
+  --app-warning: #C78C2B;
+  --app-danger: #D75858;
+  --app-info: #3C8FDD;
+  --app-skill: #8B6FE8;
   --app-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.04);
   --app-shadow-pop: 0 4px 20px rgba(0, 0, 0, 0.08);
 
@@ -131,7 +131,9 @@ body {
 
 body {
   min-height: 100vh;
-  background: var(--app-bg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(246, 248, 247, 0) 22rem),
+    var(--app-bg);
   color: var(--app-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -338,7 +340,7 @@ html[data-theme="dark"] .sidebar-toggle-btn:focus-visible {
   top: max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem));
   left: max(0.75rem, calc(env(safe-area-inset-left) + 0.5rem));
   z-index: 35;
-  display: inline-flex;
+  display: none;
   width: 44px;
   height: 44px;
   align-items: center;
@@ -364,8 +366,106 @@ html[data-theme="dark"] .sidebar-toggle-btn:focus-visible {
   outline-offset: 2px;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) and (max-width: 1199px) {
   .mobile-sidebar-fab {
+    display: inline-flex;
+  }
+}
+
+.mobile-tabbar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.2rem;
+  border-top: 1px solid var(--app-border);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.42rem max(0.5rem, env(safe-area-inset-left)) max(0.42rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-right));
+  box-shadow: 0 -10px 30px rgba(25, 38, 31, 0.08);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+html[data-theme="dark"] .mobile-tabbar {
+  background: rgba(24, 24, 24, 0.9);
+}
+
+.mobile-tabbar button {
+  min-width: 0;
+  min-height: 3.2rem;
+  border-radius: 0.7rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+  color: var(--app-muted);
+  font-size: 0.68rem;
+  font-weight: 650;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.mobile-tabbar button.active {
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+}
+
+.mobile-tabbar button:active {
+  transform: scale(0.96);
+}
+
+.mobile-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(14, 20, 17, 0.34);
+}
+
+.mobile-action-sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 46;
+  max-height: min(82vh, 44rem);
+  overflow-y: auto;
+  border-radius: 1.25rem 1.25rem 0 0;
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  padding: 0.75rem 1rem max(1rem, env(safe-area-inset-bottom));
+  box-shadow: 0 -24px 60px rgba(18, 27, 22, 0.2);
+}
+
+.mobile-sheet-handle {
+  margin: 0 auto 0.65rem;
+  width: 2.4rem;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: var(--app-border);
+}
+
+.mobile-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.mobile-sheet-action {
+  min-height: 4.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.85rem;
+  background: var(--app-surface);
+  padding: 0.78rem;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .mobile-tabbar,
+  .mobile-sheet-backdrop,
+  .mobile-action-sheet {
     display: none;
   }
 }
@@ -675,7 +775,7 @@ html[data-theme="dark"] .card:hover {
 .codex-panel {
   background: var(--app-panel-translucent);
   border: 1px solid var(--app-border);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 46px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--app-shadow);
   backdrop-filter: blur(10px);
 }
 
@@ -726,6 +826,61 @@ html:not([data-theme="dark"]) .codex-action-row:hover {
   border: 1px solid var(--app-border);
   box-shadow: var(--app-shadow);
   backdrop-filter: blur(8px);
+}
+
+.dashboard-hero,
+.dashboard-focus-panel {
+  border: 1px solid var(--app-border);
+  background:
+    linear-gradient(135deg, rgba(60, 143, 221, 0.13), rgba(46, 168, 111, 0.09) 48%, rgba(255, 255, 255, 0.9)),
+    var(--app-panel);
+  box-shadow: var(--app-shadow-pop);
+}
+
+.dashboard-focus-panel {
+  box-shadow: var(--app-shadow);
+}
+
+.today-start-card {
+  border: 1px solid color-mix(in srgb, var(--app-accent) 28%, var(--app-border));
+  background: var(--app-accent);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(60, 143, 221, 0.2);
+}
+
+.today-start-card:hover {
+  background: var(--app-accent-hover);
+}
+
+.compact-srs-card {
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+html[data-theme="dark"] .compact-srs-card {
+  border-color: var(--app-border);
+  background: rgba(31, 31, 31, 0.72);
+}
+
+.soft-tile {
+  border: 1px solid var(--app-border);
+  background: var(--app-panel);
+  box-shadow: var(--app-shadow);
+}
+
+.study-shell {
+  background: transparent;
+}
+
+.study-focus-surface {
+  background: transparent;
+}
+
+@media (max-width: 767px) {
+  .study-shell {
+    padding-inline: 0.9rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }
 
 html[data-theme="dark"] .workspace-appbar,

@@ -1,0 +1,82 @@
+export type GermanDictionaryEntry = {
+  term: string;
+  tr: string;
+  pos: 'noun' | 'verb' | 'adjective' | 'adverb' | 'phrase' | 'preposition' | 'pronoun' | 'conjunction';
+  article?: 'der' | 'die' | 'das';
+  plural?: string;
+  level?: string;
+  note?: string;
+  perfekt?: string;
+  preterite?: string;
+  rektion?: string;
+};
+
+export const OFFLINE_GERMAN_DICTIONARY: GermanDictionaryEntry[] = [
+  { term: 'ich', tr: 'ben', pos: 'pronoun', level: 'A1' },
+  { term: 'du', tr: 'sen', pos: 'pronoun', level: 'A1' },
+  { term: 'er', tr: 'o (erkek)', pos: 'pronoun', level: 'A1' },
+  { term: 'sie', tr: 'o (kadın) / onlar / siz', pos: 'pronoun', level: 'A1' },
+  { term: 'wir', tr: 'biz', pos: 'pronoun', level: 'A1' },
+  { term: 'sein', tr: 'olmak', pos: 'verb', level: 'A1', preterite: 'war', perfekt: 'ist gewesen' },
+  { term: 'haben', tr: 'sahip olmak / var olmak', pos: 'verb', level: 'A1', preterite: 'hatte', perfekt: 'hat gehabt' },
+  { term: 'werden', tr: 'olmak / -ecek', pos: 'verb', level: 'A1-A2', preterite: 'wurde', perfekt: 'ist geworden' },
+  { term: 'bin', tr: 'olmak fiili: ben ...im', pos: 'verb', level: 'A1', note: 'sein fiilinin ich çekimi' },
+  { term: 'ist', tr: 'olmak fiili: o ...dir', pos: 'verb', level: 'A1', note: 'sein fiilinin er/sie/es çekimi' },
+  { term: 'krank', tr: 'hasta', pos: 'adjective', level: 'A1' },
+  { term: 'gesund', tr: 'sağlıklı', pos: 'adjective', level: 'A1' },
+  { term: 'müde', tr: 'yorgun', pos: 'adjective', level: 'A1' },
+  { term: 'hungrig', tr: 'aç', pos: 'adjective', level: 'A1' },
+  { term: 'höflich', tr: 'kibar / nazik', pos: 'adjective', level: 'A2', note: 'Davranış biçimi için kullanılır: höflich fragen = kibarca sormak.' },
+  { term: 'freundlich', tr: 'arkadaş canlısı / güler yüzlü', pos: 'adjective', level: 'A1-A2' },
+  { term: 'wichtig', tr: 'önemli', pos: 'adjective', level: 'A1-A2' },
+  { term: 'richtig', tr: 'doğru', pos: 'adjective', level: 'A1' },
+  { term: 'falsch', tr: 'yanlış', pos: 'adjective', level: 'A1' },
+  { term: 'Ich bin krank.', tr: 'Hastayım.', pos: 'phrase', level: 'A1' },
+  { term: 'Ich habe Hunger.', tr: 'Acıktım.', pos: 'phrase', level: 'A1', note: 'Almancada açlık için çoğu zaman haben kullanılır.' },
+  { term: 'Ich habe Durst.', tr: 'Susadım.', pos: 'phrase', level: 'A1' },
+  { term: 'Hallo', tr: 'merhaba', pos: 'phrase', level: 'A1' },
+  { term: 'Danke', tr: 'teşekkürler', pos: 'phrase', level: 'A1' },
+  { term: 'bitte', tr: 'lütfen / buyurun', pos: 'adverb', level: 'A1' },
+  { term: 'und', tr: 've', pos: 'conjunction', level: 'A1' },
+  { term: 'aber', tr: 'ama', pos: 'conjunction', level: 'A1' },
+  { term: 'weil', tr: 'çünkü', pos: 'conjunction', level: 'A2', note: 'Yan cümlede çekimli fiil sona gider.' },
+  { term: 'für', tr: 'için', pos: 'preposition', level: 'A1', rektion: '+ Akkusativ' },
+  { term: 'mit', tr: 'ile', pos: 'preposition', level: 'A1', rektion: '+ Dativ' },
+  { term: 'auf', tr: 'üzerinde / -e, -a / beklemek kalıbında auf', pos: 'preposition', level: 'A1-A2' },
+  { term: 'in', tr: 'içinde / -de, -da', pos: 'preposition', level: 'A1' },
+  { term: 'zu', tr: '-e, -a / için / çok', pos: 'preposition', level: 'A1' },
+  { term: 'Mann', tr: 'adam / erkek', pos: 'noun', article: 'der', plural: 'die Männer', level: 'A1' },
+  { term: 'Frau', tr: 'kadın', pos: 'noun', article: 'die', plural: 'die Frauen', level: 'A1' },
+  { term: 'Kind', tr: 'çocuk', pos: 'noun', article: 'das', plural: 'die Kinder', level: 'A1' },
+  { term: 'Tisch', tr: 'masa', pos: 'noun', article: 'der', plural: 'die Tische', level: 'A1' },
+  { term: 'Stuhl', tr: 'sandalye', pos: 'noun', article: 'der', plural: 'die Stühle', level: 'A1' },
+  { term: 'Buch', tr: 'kitap', pos: 'noun', article: 'das', plural: 'die Bücher', level: 'A1' },
+  { term: 'Haus', tr: 'ev', pos: 'noun', article: 'das', plural: 'die Häuser', level: 'A1' },
+  { term: 'Wohnung', tr: 'daire / konut', pos: 'noun', article: 'die', plural: 'die Wohnungen', level: 'A1-A2' },
+  { term: 'Schule', tr: 'okul', pos: 'noun', article: 'die', plural: 'die Schulen', level: 'A1' },
+  { term: 'Arbeit', tr: 'iş / çalışma', pos: 'noun', article: 'die', plural: 'die Arbeiten', level: 'A1-A2' },
+  { term: 'Zeit', tr: 'zaman', pos: 'noun', article: 'die', plural: 'die Zeiten', level: 'A1' },
+  { term: 'Tag', tr: 'gün', pos: 'noun', article: 'der', plural: 'die Tage', level: 'A1' },
+  { term: 'Woche', tr: 'hafta', pos: 'noun', article: 'die', plural: 'die Wochen', level: 'A1' },
+  { term: 'Monat', tr: 'ay', pos: 'noun', article: 'der', plural: 'die Monate', level: 'A1' },
+  { term: 'Jahr', tr: 'yıl', pos: 'noun', article: 'das', plural: 'die Jahre', level: 'A1' },
+  { term: 'Problem', tr: 'problem', pos: 'noun', article: 'das', plural: 'die Probleme', level: 'A1-A2' },
+  { term: 'Frage', tr: 'soru', pos: 'noun', article: 'die', plural: 'die Fragen', level: 'A1' },
+  { term: 'Antwort', tr: 'cevap', pos: 'noun', article: 'die', plural: 'die Antworten', level: 'A1' },
+  { term: 'Fehler', tr: 'hata', pos: 'noun', article: 'der', plural: 'die Fehler', level: 'A2' },
+  { term: 'Entwicklung', tr: 'gelişim / gelişme', pos: 'noun', article: 'die', plural: 'die Entwicklungen', level: 'B1' },
+  { term: 'Möglichkeit', tr: 'olanak / imkan', pos: 'noun', article: 'die', plural: 'die Möglichkeiten', level: 'B1' },
+  { term: 'Gesellschaft', tr: 'toplum / şirket', pos: 'noun', article: 'die', plural: 'die Gesellschaften', level: 'B1' },
+  { term: 'Universität', tr: 'üniversite', pos: 'noun', article: 'die', plural: 'die Universitäten', level: 'A2' },
+  { term: 'Mädchen', tr: 'kız çocuk', pos: 'noun', article: 'das', plural: 'die Mädchen', level: 'A1' },
+  { term: 'Auto', tr: 'araba', pos: 'noun', article: 'das', plural: 'die Autos', level: 'A1' },
+  { term: 'Wasser', tr: 'su', pos: 'noun', article: 'das', level: 'A1' },
+  { term: 'gehen', tr: 'gitmek', pos: 'verb', level: 'A1', preterite: 'ging', perfekt: 'ist gegangen' },
+  { term: 'kommen', tr: 'gelmek', pos: 'verb', level: 'A1', preterite: 'kam', perfekt: 'ist gekommen' },
+  { term: 'machen', tr: 'yapmak', pos: 'verb', level: 'A1', preterite: 'machte', perfekt: 'hat gemacht' },
+  { term: 'sagen', tr: 'söylemek', pos: 'verb', level: 'A1', preterite: 'sagte', perfekt: 'hat gesagt' },
+  { term: 'lernen', tr: 'öğrenmek', pos: 'verb', level: 'A1', preterite: 'lernte', perfekt: 'hat gelernt' },
+  { term: 'sprechen', tr: 'konuşmak', pos: 'verb', level: 'A1-A2', preterite: 'sprach', perfekt: 'hat gesprochen' },
+  { term: 'warten', tr: 'beklemek', pos: 'verb', level: 'A1-A2', preterite: 'wartete', perfekt: 'hat gewartet', rektion: 'auf + Akkusativ' },
+  { term: 'sich interessieren', tr: 'ilgilenmek', pos: 'verb', level: 'A2', perfekt: 'hat sich interessiert', rektion: 'für + Akkusativ' },
+];

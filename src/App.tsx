@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react';
 import {
   BookOpen,
+  BookMarked,
+  BookOpenText,
   ChevronDown,
   Download,
+  FileText,
   Pencil,
   Flame,
+  Languages,
   LayoutDashboard,
   LibraryBig,
+  Mic,
   Moon,
+  MoreHorizontal,
   PanelLeft,
   Plus,
   Search,
   Settings,
   Sun,
   Upload,
+  X,
 } from 'lucide-react';
 import { useApp } from './AppContext';
 import Dashboard from './screens/Dashboard';
@@ -23,6 +30,11 @@ import QuizMode from './screens/QuizMode';
 import WriteMode from './screens/WriteMode';
 import MatchMode from './screens/MatchMode';
 import GrammarHub from './screens/GrammarHub';
+import ContextImport from './screens/ContextImport';
+import RedemittelLab from './screens/RedemittelLab';
+import Translator from './screens/Translator';
+import ArticleFinder from './screens/ArticleFinder';
+import TextReader from './screens/TextReader';
 import InstallBanner from './components/InstallBanner';
 import SettingsModal from './components/SettingsModal';
 import { useTheme } from './theme';
@@ -32,6 +44,11 @@ import { GrammarLevel, GrammarSection, GrammarTopic } from './types';
 export type Screen =
   | { type: 'dashboard' }
   | { type: 'grammar' }
+  | { type: 'translator' }
+  | { type: 'article_finder' }
+  | { type: 'text_reader' }
+  | { type: 'context_import' }
+  | { type: 'redemittel_lab' }
   | { type: 'edit_list'; listId: string }
   | { type: 'study'; mode: 'flashcard' | 'quiz' | 'write' | 'match'; listId: string };
 
@@ -72,6 +89,7 @@ export default function App() {
     setAiModel,
     showInstallHint,
     getDifficultWordsList,
+    getDueWordsList,
   } = useApp();
   const [currentScreen, setCurrentScreen] = useState<Screen>({ type: 'dashboard' });
   const [selectedListId, setSelectedListId] = useState('');
@@ -80,16 +98,23 @@ export default function App() {
   const [grammarQuery, setGrammarQuery] = useState('');
   const [selectedGrammarTopicId, setSelectedGrammarTopicId] = useState(GRAMMAR_TOPICS[0]?.id ?? '');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const navigate = (screen: Screen) => {
     setCurrentScreen(screen);
+    setIsMobileSheetOpen(false);
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1199px)').matches) {
+      setIsSidebarOpen(false);
+    }
   };
   const isStudyScreen = currentScreen.type === 'study';
   const difficultList = getDifficultWordsList();
+  const dueList = getDueWordsList();
   const grammarTopicOptions = getGrammarTopicOptions(grammarSectionFilter, grammarLevelFilter, grammarQuery);
+  const activeStudyListId = dueList?.words.length ? dueList.id : selectedListId || lists[0]?.id || '';
 
   const selectList = (listId: string) => {
     setSelectedListId(listId);
@@ -200,9 +225,12 @@ export default function App() {
               className="flex items-center gap-2"
               aria-label="Ana panele dön"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-claude-accent text-sm font-bold text-white shadow-soft">
-                W
-              </div>
+              <img
+                src="/icons/app-icon-192.png"
+                alt=""
+                className="h-7 w-7 rounded-lg object-cover shadow-soft"
+                aria-hidden="true"
+              />
               <span className="text-[15px] font-semibold text-claude-text">WortSchatz</span>
             </button>
             <button
@@ -242,6 +270,46 @@ export default function App() {
               >
                 <LibraryBig className="nav-icon" />
                 <span>Gramer Atlası</span>
+              </button>
+              <button
+                onClick={() => navigate({ type: 'translator' })}
+                className={isActive(currentScreen.type === 'translator')}
+                aria-current={currentScreen.type === 'translator' ? 'page' : undefined}
+              >
+                <Languages className="nav-icon" />
+                <span>Translator</span>
+              </button>
+              <button
+                onClick={() => navigate({ type: 'article_finder' })}
+                className={isActive(currentScreen.type === 'article_finder')}
+                aria-current={currentScreen.type === 'article_finder' ? 'page' : undefined}
+              >
+                <BookMarked className="nav-icon" />
+                <span>Artikel Bulucu</span>
+              </button>
+              <button
+                onClick={() => navigate({ type: 'text_reader' })}
+                className={isActive(currentScreen.type === 'text_reader')}
+                aria-current={currentScreen.type === 'text_reader' ? 'page' : undefined}
+              >
+                <BookOpenText className="nav-icon" />
+                <span>Metin Okuma</span>
+              </button>
+              <button
+                onClick={() => navigate({ type: 'context_import' })}
+                className={isActive(currentScreen.type === 'context_import')}
+                aria-current={currentScreen.type === 'context_import' ? 'page' : undefined}
+              >
+                <FileText className="nav-icon" />
+                <span>Context Import</span>
+              </button>
+              <button
+                onClick={() => navigate({ type: 'redemittel_lab' })}
+                className={isActive(currentScreen.type === 'redemittel_lab')}
+                aria-current={currentScreen.type === 'redemittel_lab' ? 'page' : undefined}
+              >
+                <Mic className="nav-icon" />
+                <span>Redemittel Lab</span>
               </button>
               {difficultList && difficultList.words.length > 0 ? (
                 <button
@@ -440,7 +508,7 @@ export default function App() {
           </header>
         )}
 
-        <div className="relative z-[1] flex-1 overflow-auto">
+        <div className="relative z-[1] flex-1 overflow-auto pb-20 md:pb-0">
           {!installHintDismissed && !isStudyScreen ? <InstallBanner onDismiss={dismissInstallHint} /> : null}
           {currentScreen.type === 'dashboard' && (
             <Dashboard selectedListId={selectedListId} onSelectList={setSelectedListId} onNavigate={navigate} />
@@ -453,6 +521,11 @@ export default function App() {
               selectedTopicId={selectedGrammarTopicId}
             />
           )}
+          {currentScreen.type === 'translator' && <Translator onNavigate={navigate} />}
+          {currentScreen.type === 'article_finder' && <ArticleFinder onNavigate={navigate} />}
+          {currentScreen.type === 'text_reader' && <TextReader onNavigate={navigate} />}
+          {currentScreen.type === 'context_import' && <ContextImport onNavigate={navigate} />}
+          {currentScreen.type === 'redemittel_lab' && <RedemittelLab onNavigate={navigate} />}
           {currentScreen.type === 'edit_list' && <ListEditor listId={currentScreen.listId} onNavigate={navigate} />}
           {currentScreen.type === 'study' && currentScreen.mode === 'flashcard' && (
             <FlashcardMode listId={currentScreen.listId} onNavigate={navigate} />
@@ -468,6 +541,164 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {!isStudyScreen ? (
+        <nav className="mobile-tabbar" aria-label="Mobil navigasyon">
+          <button
+            type="button"
+            onClick={() => navigate({ type: 'dashboard' })}
+            className={currentScreen.type === 'dashboard' ? 'active' : ''}
+            aria-current={currentScreen.type === 'dashboard' ? 'page' : undefined}
+          >
+            <LayoutDashboard size={19} />
+            <span>Panel</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => activeStudyListId && navigate({ type: 'study', mode: 'flashcard', listId: activeStudyListId })}
+            disabled={!activeStudyListId}
+            className={currentScreen.type === 'study' ? 'active' : ''}
+          >
+            <BookOpen size={19} />
+            <span>Çalış</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate({ type: 'grammar' })}
+            className={currentScreen.type === 'grammar' ? 'active' : ''}
+            aria-current={currentScreen.type === 'grammar' ? 'page' : undefined}
+          >
+            <LibraryBig size={19} />
+            <span>Gramer</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsMobileSheetOpen(true)}
+            className={isMobileSheetOpen ? 'active' : ''}
+            aria-expanded={isMobileSheetOpen}
+          >
+            <MoreHorizontal size={19} />
+            <span>Araçlar</span>
+          </button>
+          <button type="button" onClick={() => setIsSettingsOpen(true)}>
+            <Settings size={19} />
+            <span>Ayarlar</span>
+          </button>
+        </nav>
+      ) : null}
+
+      {isMobileSheetOpen && !isStudyScreen ? (
+        <>
+          <button
+            type="button"
+            className="mobile-sheet-backdrop"
+            aria-label="Menüyü kapat"
+            onClick={() => setIsMobileSheetOpen(false)}
+          />
+          <section className="mobile-action-sheet" role="dialog" aria-modal="true" aria-label="İkincil işlemler">
+            <div className="mobile-sheet-handle" />
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <div className="text-base font-semibold text-claude-text">Çalışma ve araçlar</div>
+                <div className="mt-1 text-xs text-claude-muted">{lists.length} liste · {activeStudyListId ? 'hazır' : 'liste bekleniyor'}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSheetOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-claude-border text-claude-muted"
+                aria-label="Kapat"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            {lists.length ? (
+              <label className="mb-4 block">
+                <span className="text-xs font-semibold text-claude-muted">Liste</span>
+                <select
+                  value={selectedListId}
+                  onChange={(event) => setSelectedListId(event.target.value)}
+                  className="mt-2 h-11 w-full rounded-[12px] border border-claude-border bg-claude-surface px-3 text-sm font-semibold text-claude-text outline-none focus:border-claude-accent"
+                >
+                  {lists.map((list) => (
+                    <option key={list.id} value={list.id}>
+                      {list.title} · {list.words.length}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+
+            <div className="mobile-sheet-grid">
+              <button
+                type="button"
+                onClick={() => navigate({ type: 'edit_list', listId: 'new' })}
+                className="mobile-sheet-action"
+              >
+                <span className="codex-action-icon"><Plus size={16} /></span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-claude-text">Yeni liste</span>
+                  <span className="block text-xs text-claude-muted">Kelime seti</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate({ type: 'edit_list', listId: selectedListId || lists[0]?.id || 'new' })}
+                className="mobile-sheet-action"
+              >
+                <span className="codex-action-icon"><Pencil size={16} /></span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-claude-text">Düzenle</span>
+                  <span className="block text-xs text-claude-muted">Kart içeriği</span>
+                </span>
+              </button>
+              {activeStudyListId ? (
+                <>
+                  <button type="button" onClick={() => navigate({ type: 'study', mode: 'quiz', listId: activeStudyListId })} className="mobile-sheet-action">
+                    <span className="codex-action-icon"><Search size={16} /></span>
+                    <span className="text-sm font-semibold text-claude-text">Test</span>
+                  </button>
+                  <button type="button" onClick={() => navigate({ type: 'study', mode: 'write', listId: activeStudyListId })} className="mobile-sheet-action">
+                    <span className="codex-action-icon"><Pencil size={16} /></span>
+                    <span className="text-sm font-semibold text-claude-text">Yazma</span>
+                  </button>
+                </>
+              ) : null}
+              <button type="button" onClick={() => navigate({ type: 'translator' })} className="mobile-sheet-action">
+                <span className="codex-action-icon"><Languages size={16} /></span>
+                <span className="text-sm font-semibold text-claude-text">Translator</span>
+              </button>
+              <button type="button" onClick={() => navigate({ type: 'article_finder' })} className="mobile-sheet-action">
+                <span className="codex-action-icon"><BookMarked size={16} /></span>
+                <span className="text-sm font-semibold text-claude-text">Artikel</span>
+              </button>
+              <button type="button" onClick={() => navigate({ type: 'text_reader' })} className="mobile-sheet-action">
+                <span className="codex-action-icon"><BookOpenText size={16} /></span>
+                <span className="text-sm font-semibold text-claude-text">Okuma</span>
+              </button>
+              <button type="button" onClick={() => navigate({ type: 'context_import' })} className="mobile-sheet-action">
+                <span className="codex-action-icon"><FileText size={16} /></span>
+                <span className="text-sm font-semibold text-claude-text">Import</span>
+              </button>
+              <button type="button" onClick={() => navigate({ type: 'redemittel_lab' })} className="mobile-sheet-action">
+                <span className="codex-action-icon"><Mic size={16} /></span>
+                <span className="text-sm font-semibold text-claude-text">Redemittel</span>
+              </button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button type="button" onClick={handleExportBackup} className="button-secondary h-11">
+                <Download size={15} />
+                Yedek indir
+              </button>
+              <button type="button" onClick={handleImportClick} className="button-secondary h-11">
+                <Upload size={15} />
+                Yedekten yükle
+              </button>
+            </div>
+          </section>
+        </>
+      ) : null}
 
       <SettingsModal
         isOpen={isSettingsOpen}

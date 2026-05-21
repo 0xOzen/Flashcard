@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../AppContext';
 import { Screen } from '../App';
 import { Flashcard } from '../types';
@@ -14,8 +14,19 @@ type GridItem = {
   isMatched: boolean;
 };
 
+type MatchSessionState = {
+  deckSignature: string;
+  currentIndex: number;
+  mistakes: number;
+};
+
+const CARDS_PER_ROUND = 20;
+const MATCH_SESSION_STORAGE_KEY = 'match-study-session-v1';
+const WORDS_PER_ROUND = CARDS_PER_ROUND / 2;
+
 function createGrid(words: Flashcard[]): GridItem[] {
-  const pool = [...words].sort(() => 0.5 - Math.random()).slice(0, 6);
+  const pairCount = Math.min(words.length, WORDS_PER_ROUND);
+  const pool = [...words].sort(() => 0.5 - Math.random()).slice(0, pairCount);
   const initialCards: GridItem[] = [];
 
   pool.forEach((word) => {
@@ -32,32 +43,150 @@ function createGrid(words: Flashcard[]): GridItem[] {
   return initialCards.sort(() => 0.5 - Math.random());
 }
 
+function readSessionMap(): Record<string, MatchSessionState> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const raw = localStorage.getItem(MATCH_SESSION_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+
+    return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, MatchSessionState>) : {};
+  } catch (error) {
+    console.error('Eşleştirme oturum durumu okunamadı:', error);
+    return {};
+  }
+}
+
+function loadSession(listId: string, deckSignature: string, deckLength: number): MatchSessionState | null {
+  if (!listId || !deckLength) return null;
+
+  const sessions = readSessionMap();
+  const saved = sessions[listId];
+  if (!saved) return null;
+  if (saved.deckSignature !== deckSignature) return null;
+  if (!Number.isInteger(saved.currentIndex) || saved.currentIndex < 0 || saved.currentIndex >= deckLength) return null;
+
+  return {
+    deckSignature: saved.deckSignature,
+    currentIndex: saved.currentIndex,
+    mistakes: Number.isInteger(saved.mistakes) ? Math.max(0, saved.mistakes) : 0,
+  };
+}
+
+function saveSession(listId: string, state: MatchSessionState | null) {
+  if (typeof window === 'undefined') return;
+
+  const sessions = readSessionMap();
+
+  if (!state) {
+    delete sessions[listId];
+  } else {
+    sessions[listId] = state;
+  }
+
+  localStorage.setItem(MATCH_SESSION_STORAGE_KEY, JSON.stringify(sessions));
+}
+
+function normalizeRoundStart(index: number, words: number) {
+  if (!words) return 0;
+  const maxRoundIndex = Math.max(0, Math.floor((words - 1) / WORDS_PER_ROUND));
+  const clamped = Math.max(0, Math.min(Math.floor(index / WORDS_PER_ROUND) * WORDS_PER_ROUND, maxRoundIndex * WORDS_PER_ROUND));
+  return clamped;
+}
+
 export default function MatchMode({ listId, onNavigate }: { listId: string; onNavigate: (screen: Screen) => void }) {
   const { lists, recordSuccess, recordFailure, getDifficultWordsList } = useApp();
   const list = listId === 'difficult-words' ? getDifficultWordsList() : lists.find((item) => item.id === listId);
   const words = list?.words || [];
 
+  const deckSignature = useMemo(() => words.map((word) => word.id).join('|'), [words]);
+  const sessionKey = `match:${listId}`;
+  const initialSession = useMemo(() => loadSession(sessionKey, deckSignature, words.length), [deckSignature, sessionKey, words.length]);
+
+  const [currentIndex, setCurrentIndex] = useState(initialSession ? normalizeRoundStart(initialSession.currentIndex, words.length) : 0);
   const [cards, setCards] = useState<GridItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [matchedPairs, setMatchedPairs] = useState(0);
-  const [mistakes, setMistakes] = useState(0);
+  const [mistakes, setMistakes] = useState(initialSession?.mistakes ?? 0);
   const [isComplete, setIsComplete] = useState(false);
 
+  const roundWordStart = useMemo(() => normalizeRoundStart(currentIndex, words.length), [currentIndex, words.length]);
+  const roundWords = useMemo(
+    () => words.slice(roundWordStart, roundWordStart + WORDS_PER_ROUND),
+    [roundWordStart, words],
+  );
+  const roundPairCount = roundWords.length;
+  const roundSignature = useMemo(() => roundWords.map((word) => word.id).join('|'), [roundWords]);
+  const totalRounds = Math.ceil(words.length / WORDS_PER_ROUND);
+  const activeRound = totalRounds > 0 ? Math.floor(roundWordStart / WORDS_PER_ROUND) + 1 : 0;
+
   useEffect(() => {
-    if (words.length < 2) {
+    if (!words.length) {
+      setCards([]);
+      setSelectedIds([]);
+      setIsProcessing(false);
+      setMatchedPairs(0);
+      setMistakes(0);
+      setIsComplete(false);
       return;
     }
 
-    setCards(createGrid(words));
+    const resumed = loadSession(sessionKey, deckSignature, words.length);
+    if (!resumed) {
+      setCurrentIndex(0);
+      setMatchedPairs(0);
+      setMistakes(0);
+      setSelectedIds([]);
+      setIsProcessing(false);
+      setIsComplete(false);
+      return;
+    }
+
+    setCurrentIndex(normalizeRoundStart(resumed.currentIndex, words.length));
+    setMistakes(resumed.mistakes);
+    setMatchedPairs(0);
+    setSelectedIds([]);
+    setIsProcessing(false);
+    setIsComplete(false);
+  }, [sessionKey, deckSignature, words.length]);
+
+  useEffect(() => {
+    if (roundWords.length < 2) {
+      setCards([]);
+      setSelectedIds([]);
+      setIsProcessing(false);
+      setMatchedPairs(0);
+      setIsComplete(true);
+      return;
+    }
+
+    setCards(createGrid(roundWords));
     setSelectedIds([]);
     setIsProcessing(false);
     setMatchedPairs(0);
-    setMistakes(0);
-    setIsComplete(false);
-  }, [words]);
+  }, [roundSignature]);
 
-  if (words.length < 2) {
+  useEffect(() => {
+    if (!list || words.length === 0) {
+      saveSession(sessionKey, null);
+      return;
+    }
+
+    if (isComplete) {
+      saveSession(sessionKey, null);
+      return;
+    }
+
+    saveSession(sessionKey, {
+      deckSignature,
+      currentIndex,
+      mistakes,
+    });
+  }, [deckSignature, currentIndex, isComplete, list, mistakes, sessionKey, words.length]);
+
+  if (words.length < 2 || cards.length === 0) {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-xl items-center justify-center px-4 py-10">
         <div className="panel-surface-strong rounded-[30px] p-8 text-center">
@@ -71,11 +200,33 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
     );
   }
 
-  const totalPairs = cards.length / 2;
-  const progress = totalPairs > 0 ? ((matchedPairs + (isComplete ? 0 : 0)) / totalPairs) * 100 : 0;
+  const totalPairs = roundPairCount;
+  const progress = totalPairs > 0 ? ((matchedPairs + (isComplete ? 1 : 0)) / totalPairs) * 100 : 0;
+  const shellCurrentIndex = isComplete ? Math.max(0, totalPairs - 1) : matchedPairs;
+  const roundLabel = `${activeRound}/${totalRounds}`;
+
+  const resetSession = () => {
+    setCurrentIndex(0);
+    setCards(createGrid(words.slice(0, WORDS_PER_ROUND)));
+    setSelectedIds([]);
+    setIsProcessing(false);
+    setMatchedPairs(0);
+    setMistakes(0);
+    setIsComplete(false);
+  };
+
+  const handleRoundComplete = () => {
+    const nextRoundStart = roundWordStart + totalPairs;
+    if (nextRoundStart < words.length) {
+      setCurrentIndex(nextRoundStart);
+      return;
+    }
+
+    setIsComplete(true);
+  };
 
   const handleCardClick = (card: GridItem) => {
-    if (isProcessing || card.isMatched || selectedIds.includes(card.id)) {
+    if (isProcessing || card.isMatched || selectedIds.includes(card.id) || isComplete) {
       return;
     }
 
@@ -96,14 +247,20 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
       if (firstCard.wordId === secondCard.wordId && firstCard.type !== secondCard.type) {
         recordSuccess(firstCard.wordId);
         window.setTimeout(() => {
-          setCards((previous) => previous.map((item) => (item.wordId === firstCard.wordId ? { ...item, isMatched: true } : item)));
+          setCards((previous) =>
+            previous.map((item) =>
+              item.wordId === firstCard.wordId ? { ...item, isMatched: true } : item,
+            ),
+          );
+
           setMatchedPairs((previous) => {
             const nextValue = previous + 1;
             if (nextValue === totalPairs) {
-              setIsComplete(true);
+              handleRoundComplete();
             }
             return nextValue;
           });
+
           setSelectedIds([]);
           setIsProcessing(false);
         }, 320);
@@ -125,7 +282,7 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
       description="Almanca ve Türkçe kartları eşleyerek özellikle hızlı tekrar ve dikkat tazeleme için güçlü bir mod oluşturur."
       listTitle={list?.title || 'Liste'}
       progress={progress}
-      currentIndex={matchedPairs}
+      currentIndex={shellCurrentIndex}
       total={Math.max(totalPairs, 1)}
       onBack={() => onNavigate({ type: 'dashboard' })}
       accentClassName="rose"
@@ -133,6 +290,7 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
       stats={[
         { label: 'Çift', value: `${matchedPairs}/${totalPairs}` },
         { label: 'Hata', value: `${mistakes}` },
+        { label: 'Tur', value: roundLabel },
         { label: 'Kart', value: `${cards.length}` },
         { label: 'Liste', value: list?.title || '-' },
       ]}
@@ -140,14 +298,7 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm leading-7 text-claude-subtle">Önce Almanca ya da Türkçe fark etmez; iki kart açtığında eşleşme varsa kartlar sahneden çıkar.</div>
           <button
-            onClick={() => {
-              setCards(createGrid(words));
-              setSelectedIds([]);
-              setIsProcessing(false);
-              setMatchedPairs(0);
-              setMistakes(0);
-              setIsComplete(false);
-            }}
+            onClick={resetSession}
             className="button-secondary self-start"
           >
             Turu yenile
@@ -158,29 +309,26 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
       {isComplete ? (
         <StudyCompletionCard
           title="Eşleştirme turu bitti"
-          description="Hızlı tekrar başarıyla tamamlandı. İstersen yeni bir karışım açabilir ya da kart moduna geçip derin tekrar yapabilirsin."
+          description="Bütün kart turları tamamlandı. İstersen yeni bir karışım açabilir ya da kart moduna geçip derin tekrar yapabilirsin."
           primaryLabel="Yeni tur"
           onPrimary={() => {
-            setCards(createGrid(words));
-            setSelectedIds([]);
-            setIsProcessing(false);
-            setMatchedPairs(0);
-            setMistakes(0);
-            setIsComplete(false);
+            resetSession();
           }}
           secondaryLabel="Panele dön"
           onSecondary={() => onNavigate({ type: 'dashboard' })}
           summary={[
-            { label: 'Çift', value: `${totalPairs}` },
+            { label: 'Çift', value: `${Math.min(totalPairs, words.length)}` },
             { label: 'Hata', value: `${mistakes}` },
             { label: 'Kart', value: `${cards.length}` },
+            { label: 'Tur', value: roundLabel },
           ]}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {cards.map((card) => {
             const isSelected = selectedIds.includes(card.id);
-            let buttonClassName = 'border-claude-border bg-claude-surface text-claude-text hover:border-claude-accent/50 hover:-translate-y-0.5';
+            let buttonClassName =
+              'border-claude-border bg-claude-surface text-claude-text hover:border-claude-accent/50 hover:-translate-y-0.5';
 
             if (card.isMatched) {
               buttonClassName = 'pointer-events-none border-emerald-200 bg-emerald-100/70 text-emerald-700 opacity-50';
@@ -194,7 +342,7 @@ export default function MatchMode({ listId, onNavigate }: { listId: string; onNa
                   buttonClassName = 'border-rose-300 bg-rose-500 text-white shadow-[0_18px_40px_rgba(244,63,94,0.22)]';
                 }
               } else {
-                  buttonClassName = 'border-sky-200 bg-sky-50 text-sky-700';
+                buttonClassName = 'border-sky-200 bg-sky-50 text-sky-700';
               }
             }
 

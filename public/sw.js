@@ -1,5 +1,12 @@
-const CACHE_NAME = 'wortschatz-shell-v1';
-const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/app-icon.svg'];
+const CACHE_NAME = 'wortschatz-shell-v2';
+const APP_SHELL = [
+  '/',
+  '/manifest.webmanifest',
+  '/icons/app-icon-192.png',
+  '/icons/app-icon-512.png',
+  '/icons/apple-touch-icon.png',
+  '/icons/favicon-32.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -30,6 +37,19 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          void caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          return networkResponse;
+        })
+        .catch(() => caches.match(request).then((cachedResponse) => cachedResponse || caches.match('/'))),
+    );
     return;
   }
 

@@ -16,6 +16,7 @@ loadDotenv();
 const port = Number(process.env.PORT || 8787);
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 const imageModel = process.env.NANO_BANANA_MODEL || 'gemini-3.1-flash-image-preview';
+const textModel = process.env.GEMINI_TEXT_MODEL || 'gemini-2.5-flash';
 const allowedModels = new Set([
   'gemini-3.1-flash-image-preview',
   'gemini-2.5-flash-image',
@@ -96,6 +97,116 @@ app.post('/api/ai/image-mnemonic', async (req, res) => {
       error: error instanceof Error ? error.message : 'Unknown image generation error',
     });
   }
+});
+
+app.post('/api/ai/german-tools', async (req, res) => {
+  if (!apiKey) {
+    res.status(500).json({
+      error: 'Missing GEMINI_API_KEY or GOOGLE_API_KEY on the server.',
+    });
+    return;
+  }
+
+  const prompt = String(req.body?.prompt || '').trim();
+  if (!prompt) {
+    res.status(400).json({ error: 'Prompt is required.' });
+    return;
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: textModel,
+      contents: prompt,
+    });
+
+    const text =
+      response.text ||
+      response.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim() ||
+      '';
+
+    if (!text) {
+      res.status(502).json({ error: 'No text was returned by the model.' });
+      return;
+    }
+
+    res.json({ text, model: textModel });
+  } catch (error) {
+    console.error('German tools generation failed:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown German tools generation error',
+    });
+  }
+});
+
+function normalizeLookupWord(value) {
+  return String(value || '')
+    .trim()
+    .replace(/^(der|die|das)\s+/i, '')
+    .replace(/[^\p{L}äöüÄÖÜß-]/gu, '');
+}
+
+function toTitleCaseGerman(value) {
+  if (!value) return '';
+  return value.charAt(0).toLocaleUpperCase('de-DE') + value.slice(1);
+}
+
+function stripHtml(value) {
+  return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function parseDerArtikelHtml(html, fallbackWord, article, sourceUrl) {
+  const headingMatch = html.match(/<h1[^>]*>[\s\S]*?<span[^>]*>\s*(der|die|das)\s*<\/span>\s*([^<&]+)[\s\S]*?<\/h1>/i);
+  if (!headingMatch) return null;
+
+  const term = stripHtml(headingMatch[2] || fallbackWord).replace(/\s+/g, ' ').trim();
+  const nominativeMatch = html.match(/NOMINATIV[\s\S]*?<td[^>]*>[\s\S]*?<i>\s*(der|die|das)\s*<\/i>\s*([^<]+)<\/td>[\s\S]*?<td[^>]*>[\s\S]*?<i>\s*die\s*<\/i>\s*([^<]+)<\/td>/i);
+  const plural = nominativeMatch?.[3] ? `die ${stripHtml(nominativeMatch[3])}` : undefined;
+
+  return {
+    term,
+    article,
+    plural,
+    sourceUrl,
+    checkedAt: new Date().toISOString(),
+  };
+}
+
+app.get('/api/article-lookup', async (req, res) => {
+  const rawWord = normalizeLookupWord(req.query.word);
+  const word = toTitleCaseGerman(rawWord);
+
+  if (!word) {
+    res.status(400).json({ error: 'word is required.' });
+    return;
+  }
+
+  for (const article of ['der', 'die', 'das']) {
+    const sourceUrl = `https://der-artikel.de/${article}/${encodeURIComponent(word)}.html`;
+
+    try {
+      const response = await fetch(sourceUrl, {
+        headers: {
+          'User-Agent': 'WortSchatz/1.0 article lookup',
+        },
+      });
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const html = await response.text();
+      const parsed = parseDerArtikelHtml(html, word, article, sourceUrl);
+      if (parsed) {
+        res.json(parsed);
+        return;
+      }
+    } catch (error) {
+      console.error(`Article lookup failed for ${sourceUrl}:`, error);
+    }
+  }
+
+  res.status(404).json({ error: 'Artikel bulunamadı.' });
 });
 
 if (fs.existsSync(distDir)) {

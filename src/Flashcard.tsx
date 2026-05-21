@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
 import { useState, type KeyboardEvent, type MouseEvent } from 'react';
-import { RefreshCcw, Volume2 } from 'lucide-react';
+import { ExternalLink, RefreshCcw, Volume2 } from 'lucide-react';
 import { Flashcard as FlashcardType } from './types';
+import { CARD_TYPE_LABELS, buildLookupLinks, inferCardType } from './lib/germanLearning';
 
 interface FlashcardProps {
   card: FlashcardType;
@@ -23,18 +24,6 @@ function getLevelClassName(level?: string): string {
 
   if (level.includes('B1')) {
     return 'bg-blue-100 text-blue-700';
-  }
-
-  if (level.includes('B2')) {
-    return 'bg-indigo-100 text-indigo-700';
-  }
-
-  if (level.includes('C1')) {
-    return 'bg-purple-100 text-purple-700';
-  }
-
-  if (level.includes('C2')) {
-    return 'bg-rose-100 text-rose-700';
   }
 
   return 'bg-slate-100 text-slate-500';
@@ -67,6 +56,8 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
   const backText = studyDirection === 'TR_TO_DE' ? card.term : displayTranslation;
   const frontArticle = studyDirection === 'TR_TO_DE' ? null : card.article;
   const backArticle = studyDirection === 'TR_TO_DE' ? card.article : null;
+  const cardType = inferCardType(card);
+  const lookupLinks = buildLookupLinks(card);
 
   return (
     <div
@@ -74,7 +65,7 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
       tabIndex={0}
       aria-pressed={isFlipped}
       aria-label={`${frontText} kartını çevir`}
-      className="group relative mx-auto aspect-[4/5] w-full max-w-sm cursor-pointer select-none outline-none [perspective:1000px] focus-visible:ring-2 focus-visible:ring-claude-accent focus-visible:ring-offset-2 focus-visible:ring-offset-claude-bg"
+      className="group relative mx-auto aspect-[4/5] w-full max-w-md cursor-pointer select-none outline-none [perspective:1000px] focus-visible:ring-2 focus-visible:ring-claude-accent focus-visible:ring-offset-2 focus-visible:ring-offset-claude-bg"
       onClick={toggleCard}
       onKeyDown={handleKeyDown}
     >
@@ -86,7 +77,7 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
         style={{ transformStyle: 'preserve-3d' }}
       >
         <div
-          className="absolute flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-claude-border bg-claude-panel p-5 shadow-soft sm:p-6"
+          className="absolute flex h-full w-full flex-col overflow-hidden rounded-[18px] border border-claude-border bg-claude-panel p-5 shadow-soft sm:p-6"
           style={{ backfaceVisibility: 'hidden' }}
         >
           {card.imageUrl && studyDirection !== 'TR_TO_DE' ? (
@@ -102,6 +93,9 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
               <div className="mb-3 flex gap-2">
                 <span className={`rounded-[6px] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${getLevelClassName(card.level)}`}>
                   {card.level}
+                </span>
+                <span className="rounded-[6px] bg-claude-accentSoft px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-claude-accent">
+                  {CARD_TYPE_LABELS[cardType]}
                 </span>
               </div>
             ) : null}
@@ -207,7 +201,7 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
         </div>
 
         <div
-          className="absolute flex h-full w-full flex-col items-center justify-center rounded-[22px] border border-claude-border bg-claude-panel p-6 shadow-soft sm:p-8"
+          className="absolute flex h-full w-full flex-col items-center justify-center rounded-[18px] border border-claude-border bg-claude-panel p-6 shadow-soft sm:p-8"
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           <div className="flex w-full flex-1 flex-col items-center justify-center text-center">
@@ -240,9 +234,27 @@ export default function Flashcard({ card, studyDirection = 'DE_TO_TR' }: Flashca
             {card.note ? (
               <div className="mt-6 w-full rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-left">
                 <div className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-500/80">Not</div>
-                <p className="text-sm font-medium leading-relaxed text-amber-200/90">{card.note}</p>
+                <p className="text-sm font-medium leading-relaxed text-amber-800 dark:text-amber-100">{card.note}</p>
               </div>
             ) : null}
+
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              {(['duden', 'dwds', 'wiktionary', 'verbformen', 'youglish', 'forvo'] as const).map((key) =>
+                lookupLinks[key] ? (
+                  <a
+                    key={key}
+                    href={lookupLinks[key]}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(event) => event.stopPropagation()}
+                    className="inline-flex items-center gap-1 rounded-[9px] border border-claude-border bg-claude-surface px-2.5 py-1.5 text-[11px] font-semibold text-claude-muted transition-colors hover:text-claude-text"
+                  >
+                    <ExternalLink size={12} />
+                    {key}
+                  </a>
+                ) : null,
+              )}
+            </div>
           </div>
         </div>
       </motion.div>

@@ -1,5 +1,4 @@
-import { ExternalLink } from 'lucide-react';
-import { GRAMMAR_TOPICS, getGrammarSection, getGrammarSources, getGrammarTopicsBySection } from '../grammarData';
+import { GRAMMAR_TOPICS, getGrammarSection, getGrammarTopicsBySection } from '../grammarData';
 import { GrammarLevel, GrammarSection, GrammarTopic } from '../types';
 
 export type GrammarSectionFilter = GrammarSection['id'] | 'ALL';
@@ -38,6 +37,35 @@ function getFilteredTopics(sectionFilter: GrammarSectionFilter, level: GrammarLe
   });
 }
 
+function getGrammarExplanation(topic: GrammarTopic): string[] {
+  const primaryExample = topic.examples[0];
+  const focusBySection: Record<GrammarSection['id'], string> = {
+    verben: 'çekimli fiili, varsa ikinci fiil parçasını ve yardımcı fiil seçimini birlikte kontrol etmek',
+    'nomen-artikel-pronomen': 'artikel, sayı ve kasus bilgisini tek paket olarak görmek',
+    'adjektive-adverbien': 'niteliğin cümlede isimden önce mi, fiilden sonra mı yoksa zarf göreviyle mi durduğunu ayırmak',
+    praepositionen: 'edatı tek başına değil, istediği kasus ve anlam ilişkisiyle birlikte öğrenmek',
+    wortbildung: 'kökü, eki, birleşen parçaları ve özellikle son unsurun görevini bulmak',
+    'einfache-saetze': 'çekimli fiilin yerini, özneyi ve ek bilgilerin cümledeki sırasını birlikte okumak',
+    'zusammengesetzte-saetze': 'bağlacın kurduğu anlam ilişkisini ve yan cümlede fiilin nereye gittiğini izlemek',
+  };
+  const patternNote = topic.pattern
+    ? `Temel kalıp olarak "${topic.pattern}" çizgisini takip et. Bu kalıp, önce iskeleti görmeni, sonra değişen parçaları kontrollü biçimde yerleştirmeni sağlar.`
+    : 'Bu konuyu tek bir ezber cümlesiyle değil, cümlede hangi görevi üstlendiğini görerek çalışmak daha kalıcı olur.';
+  const usageNotes = topic.highlights.slice(0, 2).join(' ');
+  const exampleNote = primaryExample
+    ? `"${primaryExample.de}" örneğinde yapı gerçek bir cümle içinde görünür: ${primaryExample.tr} Bu yüzden sadece kuralı değil, kuralın cümlede nerede durduğunu da takip et.`
+    : 'Örnekleri okurken önce çekimli fiili, sonra artikel/kasus veya ikinci fiil parçasını bulmak yapıyı daha görünür kılar.';
+  const pitfallNote = topic.pitfalls[0]
+    ? `En kritik nokta: ${topic.pitfalls[0]} Bu hatayı azaltmak için yeni cümle kurarken ${focusBySection[topic.sectionId]} iyi bir kontrol alışkanlığıdır.`
+    : `Yeni cümle kurarken ${focusBySection[topic.sectionId]} iyi bir kontrol alışkanlığıdır.`;
+
+  return [
+    patternNote,
+    `${usageNotes} ${exampleNote}`,
+    pitfallNote,
+  ];
+}
+
 export default function GrammarHub({
   selectedSectionFilter,
   selectedLevel,
@@ -50,9 +78,8 @@ export default function GrammarHub({
     GRAMMAR_TOPICS.find((topic) => topic.id === selectedTopicId) ??
     filteredTopics[0] ??
     GRAMMAR_TOPICS[0];
-  const selectedSection = selectedTopic ? getGrammarSection(selectedTopic.sectionId) : undefined;
   const activeSection = selectedSectionFilter === 'ALL' ? undefined : getGrammarSection(selectedSectionFilter);
-  const sectionSources = selectedSection ? getGrammarSources(selectedSection.sourceIds) : [];
+  const topicExplanation = selectedTopic ? getGrammarExplanation(selectedTopic) : [];
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col px-4 py-5 sm:px-6 lg:px-8">
@@ -80,6 +107,15 @@ export default function GrammarHub({
             <section className="border-b border-claude-border py-5">
               <div className="text-xs uppercase tracking-[0.18em] text-claude-muted">Özet</div>
               <p className="mt-3 text-sm leading-7 text-claude-subtle">{selectedTopic.summary}</p>
+            </section>
+
+            <section className="border-b border-claude-border py-5">
+              <div className="text-xs uppercase tracking-[0.18em] text-claude-muted">Konu Anlatımı</div>
+              <div className="mt-3 space-y-3 text-sm leading-7 text-claude-subtle">
+                {topicExplanation.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
             </section>
 
             {selectedTopic.pattern ? (
@@ -123,27 +159,6 @@ export default function GrammarHub({
                     </p>
                   ))}
                 </div>
-              </div>
-            </section>
-
-            <section className="py-5">
-              <div className="text-xs uppercase tracking-[0.18em] text-claude-muted">Kaynaklar</div>
-              <div className="mt-3 divide-y divide-claude-border">
-                {sectionSources.map((source) => (
-                  <a
-                    key={source.id}
-                    href={source.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between gap-4 py-3 text-sm text-claude-subtle transition-colors hover:text-claude-text"
-                  >
-                    <span>
-                      <span className="font-medium text-claude-text">{source.title}</span>
-                      <span className="ml-2 text-xs uppercase tracking-[0.16em] text-claude-muted">{source.provider}</span>
-                    </span>
-                    <ExternalLink size={14} className="shrink-0 text-claude-muted" />
-                  </a>
-                ))}
               </div>
             </section>
           </div>

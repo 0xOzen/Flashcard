@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react';
-import { Flashcard, WordType } from '../types';
-import { ChevronDown, Trash2, ImagePlus, Loader2 } from 'lucide-react';
+import { ErrorType, Flashcard, GermanCardType, SourceTag, WordType } from '../types';
+import { ChevronDown, Trash2, ImagePlus, Loader2, ExternalLink } from 'lucide-react';
 import { generateImageMnemonic } from '../services/gemini';
 import { useApp } from '../AppContext';
+import { CARD_TYPE_LABELS, ERROR_TYPE_LABELS, buildLookupLinks } from '../lib/germanLearning';
 
 interface WordEditorItemProps {
   key?: string;
@@ -20,6 +21,9 @@ const inputClassName =
   'w-full rounded-[12px] border border-claude-border bg-claude-surface px-3 py-2.5 text-[15px] font-medium text-claude-text outline-none transition-all placeholder:font-normal placeholder:text-claude-muted focus:border-claude-accent focus:ring-4 focus:ring-claude-accent/10 disabled:opacity-50';
 
 const textareaClassName = `${inputClassName} min-h-[96px] resize-y`;
+const cardTypeOptions = Object.entries(CARD_TYPE_LABELS) as [GermanCardType, string][];
+const errorTypeOptions = Object.entries(ERROR_TYPE_LABELS) as [ErrorType, string][];
+const sourceOptions: SourceTag[] = ['Goethe', 'telc', 'OESD', 'DW', 'Duden', 'DWDS', 'Wiktionary', 'Verbformen', 'Forvo', 'Redemittel', 'TurkishSpeakerErrors', 'Custom'];
 
 export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: WordEditorItemProps) {
   const hasAdvancedFields = Boolean(
@@ -79,6 +83,11 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
     onUpdate(word.id, 'phraseForms', updated);
   };
 
+  const toggleSourceTag = (tag: SourceTag) => {
+    const current = word.sourceTags || [];
+    onUpdate(word.id, 'sourceTags', current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]);
+  };
+
   const termLabel =
     word.wordType === 'noun'
       ? 'Almanca isim'
@@ -95,7 +104,7 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
   return (
     <div className="group relative overflow-hidden rounded-[18px] border border-claude-border bg-claude-panel p-4 shadow-soft transition-all hover:border-claude-border sm:p-5">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="grid gap-4 sm:grid-cols-[220px_140px]">
+        <div className="grid gap-4 sm:grid-cols-[220px_180px_140px]">
           <div>
             <Label>Kart türü</Label>
             <select
@@ -112,15 +121,22 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
             </select>
           </div>
           <div>
+            <Label>Almanca görev</Label>
+            <select value={word.cardType || 'meaning'} onChange={(event) => onUpdate(word.id, 'cardType', event.target.value as GermanCardType)} disabled={isDefault} className={inputClassName}>
+              {cardTypeOptions.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <Label>Seviye</Label>
             <select value={word.level || ''} onChange={(event) => onUpdate(word.id, 'level', event.target.value)} disabled={isDefault} className={inputClassName}>
               <option value="">Yok</option>
               <option value="A1">A1</option>
               <option value="A2">A2</option>
               <option value="B1">B1</option>
-              <option value="B2">B2</option>
-              <option value="C1">C1</option>
-              <option value="C2">C2</option>
             </select>
           </div>
         </div>
@@ -164,6 +180,35 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
 
       {showDetails ? (
         <>
+      <div className="mt-5 border-t border-claude-border pt-5">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label>Özel soru</Label>
+            <textarea value={word.prompt || ''} onChange={(event) => onUpdate(word.id, 'prompt', event.target.value)} disabled={isDefault} placeholder="örn. Ich interessiere mich ___ Politik." className={textareaClassName} />
+          </div>
+          <div>
+            <Label>Özel cevap</Label>
+            <textarea value={word.answer || ''} onChange={(event) => onUpdate(word.id, 'answer', event.target.value)} disabled={isDefault} placeholder="örn. für" className={textareaClassName} />
+          </div>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div>
+            <Label>Hata tipi</Label>
+            <select value={word.errorType || 'meaning'} onChange={(event) => onUpdate(word.id, 'errorType', event.target.value as ErrorType)} disabled={isDefault} className={inputClassName}>
+              {errorTypeOptions.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label>Çeldiriciler</Label>
+            <input value={(word.distractors || []).join(', ')} onChange={(event) => onUpdate(word.id, 'distractors', event.target.value.split(',').map((item) => item.trim()).filter(Boolean))} disabled={isDefault} placeholder="auf, an, für" className={inputClassName} />
+          </div>
+        </div>
+      </div>
+
       {word.wordType === 'noun' ? (
         <div className="mt-5 grid gap-5 border-t border-claude-border pt-5 md:grid-cols-2">
           <div>
@@ -277,6 +322,37 @@ export default function WordEditorItem({ word, isDefault, onUpdate, onRemove }: 
             <Label>Dilbilgisi notu</Label>
             <textarea value={word.note || ''} onChange={(event) => onUpdate(word.id, 'note', event.target.value)} disabled={isDefault} className={textareaClassName} />
           </div>
+        </div>
+      </div>
+
+      <div className="mt-5 border-t border-claude-border pt-5">
+        <Label>Kaynak etiketleri</Label>
+        <div className="flex flex-wrap gap-2">
+          {sourceOptions.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => toggleSourceTag(tag)}
+              disabled={isDefault}
+              className={`rounded-[10px] border px-3 py-2 text-xs font-semibold transition-colors ${
+                word.sourceTags?.includes(tag)
+                  ? 'border-claude-accent bg-claude-accentSoft text-claude-accent'
+                  : 'border-claude-border bg-claude-surface text-claude-subtle hover:text-claude-text'
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {Object.entries(buildLookupLinks(word))
+            .filter(([, url]) => Boolean(url))
+            .map(([label, url]) => (
+              <a key={label} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-[10px] border border-claude-border bg-claude-surface px-3 py-2 text-xs font-semibold text-claude-subtle transition-colors hover:text-claude-text">
+                <ExternalLink size={13} />
+                {label}
+              </a>
+            ))}
         </div>
       </div>
 

@@ -1,5 +1,64 @@
 export type WordType = 'noun' | 'verb' | 'adjective' | 'phrase' | 'other';
 
+export type GermanCardType =
+  | 'meaning'
+  | 'production'
+  | 'article'
+  | 'plural'
+  | 'verb_form'
+  | 'perfekt'
+  | 'case_government'
+  | 'preposition'
+  | 'sentence_pattern'
+  | 'redemittel'
+  | 'error_correction'
+  | 'pronunciation';
+
+export type ReviewGrade = 'again' | 'hard' | 'good' | 'easy';
+
+export type ErrorType =
+  | 'meaning'
+  | 'article'
+  | 'plural'
+  | 'verb'
+  | 'case'
+  | 'preposition'
+  | 'word_order'
+  | 'redemittel'
+  | 'pronunciation'
+  | 'other';
+
+export type SourceTag =
+  | 'Goethe'
+  | 'telc'
+  | 'OESD'
+  | 'DW'
+  | 'Duden'
+  | 'DWDS'
+  | 'Wiktionary'
+  | 'Verbformen'
+  | 'Forvo'
+  | 'Redemittel'
+  | 'TurkishSpeakerErrors'
+  | 'Custom';
+
+export type LookupLinks = {
+  duden?: string;
+  dwds?: string;
+  wiktionary?: string;
+  verbformen?: string;
+  youglish?: string;
+  forvo?: string;
+};
+
+export type ArticleLookupCacheEntry = {
+  term: string;
+  article: 'der' | 'die' | 'das';
+  plural?: string;
+  sourceUrl?: string;
+  checkedAt: string;
+};
+
 export type Flashcard = {
   id: string;
   term: string;
@@ -13,6 +72,21 @@ export type Flashcard = {
   note?: string;
 
   wordType?: WordType;
+  cardType?: GermanCardType;
+  sourceTags?: SourceTag[];
+  lookupLinks?: LookupLinks;
+  prompt?: string;
+  answer?: string;
+  distractors?: string[];
+  errorType?: ErrorType;
+  srs?: {
+    dueDate: string;
+    interval: number;
+    ease: number;
+    lastReviewed?: string;
+    reviewCount: number;
+    lapseCount: number;
+  };
   
   // Noun
   article?: string;
@@ -55,12 +129,17 @@ export type VocabList = {
 export type WordStats = {
   correct: number;
   incorrect: number;
+  lastReviewed?: string;
+  errorCounts?: Partial<Record<ErrorType, number>>;
 };
 
 export type AppState = {
   lists: VocabList[];
   stats: Record<string, WordStats>;
+  articleLookupCache?: Record<string, ArticleLookupCacheEntry>;
   studyDirection?: 'DE_TO_TR' | 'TR_TO_DE';
+  desiredRetention?: number;
+  dailyNewLimit?: number;
   aiModel?: 'gemini-3.1-flash-image-preview' | 'gemini-2.5-flash-image' | 'gemini-3-pro-image-preview';
   browserApiKey?: string;
   installHintDismissed?: boolean;

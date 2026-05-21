@@ -1,0 +1,37 @@
+id: apps.flashcard-e
+name: FlashCard-E / WortSchatz Web App
+kind: web_app
+status: active
+owner: Ali Osman Ozen
+visibility: private_local
+parent:
+  id: apps
+  path: /Users/0xozen/Projects/apps
+project_spine_version: v1
+canonical_path: /Users/0xozen/Projects/apps/subprojects/flashcard-e
+anchors:
+  todo: ops/TODO.md
+  status: ops/STATUS.md
+  roadmap: ops/ROADMAP.md
+  decisions: ops/DECISIONS.md
+  runbook: ops/RUNBOOK.md
+  evidence: evidence/
+  state: state/
+  private: private/
+agent_read_order:
+  - AGENTS.md
+  - project.yaml
+  - PROJECT.md
+  - README.md
+  - ops/STATUS.md
+  - ops/TODO.md
+approval_gates:
+  - push
+  - pull_request
+  - deploy
+  - publish
+  - external_message
+  - credential_use
+  - purchase
+  - destructive_delete
+safety_boundary: "No external deployment, credential use, public publishing, or production claim without Ali approval."

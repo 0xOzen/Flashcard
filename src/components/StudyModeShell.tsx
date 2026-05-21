@@ -50,8 +50,8 @@ export default function StudyModeShell({
   const progressColor = progressBarMap[accentClassName] ?? progressBarMap.teal;
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-3 px-3 py-3 sm:px-5 sm:py-5 lg:px-8">
-      <section className="workspace-toolbar rounded-[18px] px-3 py-3 sm:px-4">
+    <div className="study-shell mx-auto flex min-h-full w-full max-w-5xl flex-col gap-3 px-3 py-3 sm:px-5 sm:py-5 lg:px-8">
+      <section className="workspace-toolbar rounded-[16px] px-3 py-3 sm:px-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
@@ -94,7 +94,7 @@ export default function StudyModeShell({
             {stats.length > 0 ? (
               <div className="hidden shrink-0 items-center gap-2 md:flex">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-[10px] border border-claude-border bg-claude-surface px-2.5 py-1 text-xs text-claude-subtle">
+                  <div key={stat.label} className="rounded-[999px] border border-claude-border bg-claude-surface px-2.5 py-1 text-xs text-claude-subtle">
                     <span className="text-claude-muted">{stat.label}</span> {stat.value}
                   </div>
                 ))}
@@ -104,8 +104,8 @@ export default function StudyModeShell({
         </div>
       </section>
 
-      <section className="card rounded-[18px] p-3 sm:p-5">{children}</section>
-      {footer ? <div className="card rounded-[18px] p-3 sm:p-4">{footer}</div> : null}
+      <section className="study-focus-surface p-0 sm:p-2">{children}</section>
+      {footer ? <div className="workspace-toolbar rounded-[16px] p-3 sm:p-4">{footer}</div> : null}
     </div>
   );
 }
